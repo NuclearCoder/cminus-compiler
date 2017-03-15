@@ -15,7 +15,7 @@ class WordTable {
 
     init {
         for ((index, word) in STD_NAMES.withIndex())
-            define(true, word, index)
+            define(true, word, index + 1)
         nameIndex = STD_NAMES.size
 
         for ((word, symbol) in KEYWORDS)

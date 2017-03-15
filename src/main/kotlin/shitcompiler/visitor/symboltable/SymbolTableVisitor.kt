@@ -59,9 +59,15 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         val name = node.name
         val type = visitExpression(node.value)
 
-        val varType = table.find(name).asVariable().type
-        if (varType != type) {
-            errors.println("Trying to assign $type to $varType")
+        val obj = table.find(name)
+        when (obj.kind) {
+            Kind.VARIABLE -> {
+                val varType = obj.asVariable().type
+                if (varType != type) {
+                    errors.println("Trying to assign $type to $varType")
+                }
+            }
+            else -> errors.println("Trying to assign a value to kind ${obj.kind}")
         }
     }
 
@@ -155,7 +161,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             Kind.VARIABLE -> obj.asVariable().type
             Kind.PARAMETER -> obj.asParameter().type
             else -> {
-                errors.println("Identifier must refer to a constant, variable or paramater")
+                errors.println("Identifier must refer to a constant, variable or parameter")
                 typeUniversal
             }
         }

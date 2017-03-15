@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
         println("Tokens:\n  ${tokens.toPrettyString()}")
 
         val root = run { Parser(tokens, ps).execute() }
-        println("\nAST:\n  $root")
+        println("\nAST:\n  $root\n")
 
         val symTableVisitor = SymbolTableVisitor(ps)
         symTableVisitor.visit(root)
