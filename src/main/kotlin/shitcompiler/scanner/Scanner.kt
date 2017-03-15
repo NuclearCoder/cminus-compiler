@@ -1,8 +1,10 @@
 package shitcompiler.scanner
 
-import shitcompiler.LexerException
+import shitcompiler.ETX
+import shitcompiler.SEPARATORS
 import shitcompiler.token.Symbol
 import shitcompiler.token.Symbol.*
+import java.io.PrintWriter
 import java.util.*
 import kotlin.properties.Delegates.notNull
 
@@ -10,19 +12,20 @@ import kotlin.properties.Delegates.notNull
 * Created by NuclearCoder on 14/01/2017.
 */
 
-class Scanner(private val input: String) {
+class Scanner(private val input: String, private val errors: PrintWriter) {
 
     private val symbols = LinkedList<Int>()
 
-    private var position = -1
+    private var position: Int = -1
     private var currentChar by notNull<Char>()
 
-    private var nameIndex = 1  // names - acts as a minimal name table
+    private val nameTable = WordTable()
 
     fun execute(): Queue<Int> {
         nextChar()
         while (ETX != currentChar)
             nextSymbol()
+        emit(END_TEXT)
         return symbols
     }
 
@@ -33,11 +36,11 @@ class Scanner(private val input: String) {
     }
 
     private fun emit(argument: Int) {
-        symbols.push(argument)
+        symbols.addLast(argument)
     }
 
     private fun emit(symbol: Symbol) {
-        symbols.push(symbol.ordinal)
+        symbols.addLast(symbol.ordinal)
     }
 
     /** moves the cursor and emits the Symbol */
@@ -47,7 +50,7 @@ class Scanner(private val input: String) {
     }
 
     private fun skipSeparators() {
-        while (currentChar in SEPARATORS) {
+        while (currentChar != ETX && currentChar in SEPARATORS) {
             if (currentChar == '\n')
             // this is for the parser to print line number when we add error recovery
                 emit(NEWLINE)
@@ -56,7 +59,7 @@ class Scanner(private val input: String) {
     }
 
     private fun skipLine() {
-        while (currentChar != '\n')
+        while (currentChar != '\n' && currentChar != ETX)
             nextChar()
     }
 
@@ -67,7 +70,7 @@ class Scanner(private val input: String) {
 
         if (currentChar.isLetter()) scanWord()
         else if (currentChar.isDigit()) scanNumeral()
-         else if (currentChar == '\'') scanCharacter()
+        else if (currentChar == '\'') scanCharacter()
         else when (currentChar) {
             '{' -> nextEmit(BEGIN)
             '}' -> nextEmit(END)
@@ -86,8 +89,9 @@ class Scanner(private val input: String) {
             '<' -> scanLesser()
             '>' -> scanGreater()
             '!' -> scanNot()
+            '&' -> scanAmp()
+            '|' -> scanPipe()
             '%' -> nextEmit(MOD)
-            '?' -> nextEmit(QUESTION_MARK)
             ETX -> {}
             else -> nextEmit(UNKNOWN)
         }
@@ -99,14 +103,12 @@ class Scanner(private val input: String) {
             sb.append(currentChar)
             nextChar()
         }
-        val word = sb.toString()
-        val symbol = KEYWORDS[word]
-        if (symbol != null) {
-            emit(symbol)
-        } else {
+
+        val rec = nameTable.search(sb.toString())
+        if (rec.isName) {
             emit(ID)
-            emit(nameIndex++)
         }
+        emit(rec.index)
     }
 
     private fun scanNumeral() {
@@ -117,10 +119,14 @@ class Scanner(private val input: String) {
                 value = 10 * value + digit
                 nextChar()
             } else {
-                throw LexerException("An int constant is outside the range 0..${Int.MAX_VALUE}")
+                errors.println("An int constant is outside the range 0..${Int.MAX_VALUE}")
+                // error recovery:
+                emit(NUM_CONST)
+                emit(0)
+                return
             }
         }
-        emit(Symbol.NUM_CONST)
+        emit(NUM_CONST)
         emit(value)
     }
 
@@ -139,9 +145,14 @@ class Scanner(private val input: String) {
         }
         nextChar()
         if (currentChar != '\'') {
-            throw LexerException("A char constant is missing a closing quote")
+            errors.println("A char constant is missing a closing quote")
+            // error recovery:
+            emit(CHAR_CONST)
+            emit(0)
+            return
         }
-        emit(Symbol.CHAR_CONST)
+        nextChar()
+        emit(CHAR_CONST)
         emit(character.toInt())
     }
 
@@ -198,8 +209,18 @@ class Scanner(private val input: String) {
 
     private fun scanNot() {
         nextChar()
-        if (currentChar == '=')
-            nextEmit(NOT_EQUAL)
+        if (currentChar == '=') nextEmit(NOT_EQUAL)
+        else emit(NOT)
+    }
+
+    private fun scanAmp() {
+        nextChar()
+        if (currentChar == '&') nextEmit(AND)
+    }
+
+    private fun scanPipe() {
+        nextChar()
+        if (currentChar == '|') nextEmit(OR)
     }
 
 }
