@@ -1,6 +1,5 @@
 package shitcompiler.visitor.symboltable
 
-import com.sun.org.apache.xpath.internal.operations.Variable
 import shitcompiler.ast.AST
 import shitcompiler.ast.expression.Atom
 import shitcompiler.ast.expression.BinaryOp
@@ -60,7 +59,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         val name = node.name
         val type = visitExpression(node.value)
 
-        val varType = table.find(name).asVariable()?.type
+        val varType = table.find(name).asVariable().type
         if (varType != type) {
             errors.println("Trying to assign $type to $varType")
         }

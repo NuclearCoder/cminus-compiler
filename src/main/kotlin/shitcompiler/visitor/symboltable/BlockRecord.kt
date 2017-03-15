@@ -6,7 +6,7 @@ import java.io.PrintWriter
 * Created by NuclearCoder on 06/03/17.
 */
 
-internal class BlockRecord(val errors: PrintWriter) {
+internal class BlockRecord(private val errors: PrintWriter) {
 
     private val records = mutableListOf<ObjectRecord>()
 

@@ -7,7 +7,6 @@ import shitcompiler.token.Symbol.NEWLINE
 import shitcompiler.token.removeSymbol
 import java.io.PrintWriter
 import java.util.*
-import kotlin.properties.Delegates.notNull
 
 /**
 * Created by NuclearCoder on 14/01/2017.
@@ -32,7 +31,7 @@ class Parser(private val symbols: Queue<Int>, private val errors: PrintWriter) {
         symbol = symbols.removeSymbol()
         while (symbol == NEWLINE) {
             lineNo++
-            symbols.removeSymbol()
+            symbol = symbols.removeSymbol()
         }
         if (symbol in LONG_SYMBOLS) {
             argument = symbols.remove()

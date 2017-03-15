@@ -2,8 +2,8 @@ package shitcompiler
 
 import shitcompiler.parser.Parser
 import shitcompiler.scanner.Scanner
+import shitcompiler.token.toPrettyString
 import shitcompiler.visitor.symboltable.SymbolTableVisitor
-import java.io.PrintStream
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -12,21 +12,26 @@ import java.io.StringWriter
 */
 
 fun main(args: Array<String>) {
-    do {
+    while (true) {
         print(">>> ")
         val input = readMultiLine()
+        if (input.isEmpty())
+            return
+
         val errors = StringWriter()
         val ps = PrintWriter(errors)
 
         val tokens = run { Scanner(input, ps).execute() }
+        println("Tokens:\n  ${tokens.toPrettyString()}")
+
         val root = run { Parser(tokens, ps).execute() }
-        println("\n $root")
+        println("\nAST:\n  $root")
 
         val symTableVisitor = SymbolTableVisitor(ps)
         symTableVisitor.visit(root)
 
         println(errors.toString())
-    } while (input.isNotEmpty())
+    }
 }
 
 fun readMultiLine(): String {

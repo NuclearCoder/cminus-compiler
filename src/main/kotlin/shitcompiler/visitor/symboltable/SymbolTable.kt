@@ -19,7 +19,7 @@ class SymbolTable(private val errors: PrintWriter) {
     private val blocks = arrayListOf(BlockRecord(errors))
 
     // the 0-th level is the standard level
-    var currentLevel: Int = 0
+    private var currentLevel: Int = 0
 
     init {
         var i = 0

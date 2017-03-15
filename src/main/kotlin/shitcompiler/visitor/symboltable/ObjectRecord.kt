@@ -6,7 +6,7 @@ import java.io.PrintWriter
 * Created by NuclearCoder on 06/03/17.
 */
 
-data class ObjectRecord(val name: Int, val kind: Kind, val data: ObjectClass, val errors: PrintWriter) {
+data class ObjectRecord(val name: Int, val kind: Kind, val data: ObjectClass, private val errors: PrintWriter) {
 
     fun asConstant() = data as Constant
     fun asArrayType() = data as ArrayType
