@@ -1,11 +1,10 @@
 package shitcompiler.ast.expression
 
-import shitcompiler.ast.AST
 import shitcompiler.token.Symbol
 
 /**
-* Created by NuclearCoder on 02/03/17.
-*/
+ * Created by NuclearCoder on 02/03/17.
+ */
 
 class BinaryOp(val sym: Symbol, val left: Expression, val right: Expression) : Expression {
 

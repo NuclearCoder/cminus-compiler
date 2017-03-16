@@ -1,28 +1,25 @@
 package shitcompiler.parser
 
-import shitcompiler.ast.AST
-import shitcompiler.ast.statement.Assignment
-import shitcompiler.ast.statement.BlockStatement
-import shitcompiler.ast.statement.Declaration
-import shitcompiler.ast.statement.EmptyStatement
+import shitcompiler.ast.statement.*
 import shitcompiler.token.Symbol.*
 
 /**
-* Created by NuclearCoder on 03/03/17.
-*/
+ * Created by NuclearCoder on 03/03/17.
+ */
 
-private fun Parser.statementList(): List<AST> {
-    val statements = mutableListOf<AST>()
+fun Parser.statementList(): List<Statement> {
+    val statements = mutableListOf<Statement>()
     while (symbol in STATEMENT_SYMBOLS) {
         statements.add(statement())
     }
     return statements
 }
 
-fun Parser.statement(): AST {
+fun Parser.statement(): Statement {
     return when (symbol) {
         BEGIN -> blockStatement()
-        INT, BOOL, CHAR -> declarationStatement()
+        STRUCT -> structStatement()
+        INT, CHAR, BOOL -> declarationStatement()
         ID -> assignmentStatement()
         SEMICOLON -> emptyStatement()
         else -> {
@@ -32,18 +29,28 @@ fun Parser.statement(): AST {
     }
 }
 
-fun Parser.declarationStatement(): AST {
-    val sym = symbol
-    expect(symbol)
-    val name = argument
-    expect(ID)
-    expect(SEMICOLON)
-    return Declaration(sym, name)
+fun Parser.structStatement(): Statement {
+    expect(STRUCT)
+    return if (symbol == ID) declarationStatement()
+    else structTypeDefinition()
 }
 
-fun Parser.assignmentStatement(): AST {
+fun Parser.declarationStatement(): Declaration {
+    val type = typeReference()
+
+    // TODO: replace with variable group
     val name = argument
     expect(ID)
+
+    expect(SEMICOLON)
+    return Declaration(type, name)
+}
+
+fun Parser.assignmentStatement(): Assignment {
+    // TODO: replace with variable access
+    val name = argument
+    expect(ID)
+
     val sym = symbol
     if (symbol in ASSIGNMENT_SYMBOLS) {
         expect(symbol)
@@ -55,14 +62,14 @@ fun Parser.assignmentStatement(): AST {
     return Assignment(sym, name, value)
 }
 
-fun Parser.blockStatement(): AST {
+fun Parser.blockStatement(): BlockStatement {
     expect(BEGIN)
     val statements = statementList()
     expect(END)
     return BlockStatement(statements)
 }
 
-fun Parser.emptyStatement(): AST {
+fun Parser.emptyStatement(): EmptyStatement {
     expect(SEMICOLON)
     return EmptyStatement()
 }

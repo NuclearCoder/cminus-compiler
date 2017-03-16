@@ -1,11 +1,11 @@
 package shitcompiler.token
 
-import shitcompiler.parser.LONG_SYMBOLS
+import shitcompiler.LONG_SYMBOLS
 import java.util.*
 
 /**
-* Created by NuclearCoder on 14/01/2017.
-*/
+ * Created by NuclearCoder on 14/01/2017.
+ */
 
 enum class Symbol(private val s: String) {
     ID("id"),
@@ -19,7 +19,7 @@ enum class Symbol(private val s: String) {
     INT("int"),
     BOOL("bool"),
     CHAR("char"),
-    RECORD("record"),
+    STRUCT("struct"),
 
     BEGIN("{"),
     END("}"),
@@ -67,15 +67,15 @@ enum class Symbol(private val s: String) {
     COMMA(","),
     SEMICOLON(";"),
 
-    NEWLINE("\\n"),
+    NEWLINE("[NL]"),
     END_TEXT("[ETX]"),
-    UNKNOWN("[unknown]");
+    UNKNOWN("[UNKNOWN]");
 
     override fun toString() = s
 }
 
-inline fun Int.toSymbol() = Symbol.values()[this]
-inline fun Queue<Int>.removeSymbol() = remove().toSymbol()
+fun Int.toSymbol() = Symbol.values()[this]
+fun Queue<Int>.removeSymbol() = remove().toSymbol()
 
 fun Queue<Int>.toPrettyString(): String {
     val it = this.iterator()

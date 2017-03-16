@@ -9,8 +9,8 @@ import java.util.*
 import kotlin.properties.Delegates.notNull
 
 /**
-* Created by NuclearCoder on 14/01/2017.
-*/
+ * Created by NuclearCoder on 14/01/2017.
+ */
 
 class Scanner(private val input: String, private val errors: PrintWriter) {
 
@@ -92,7 +92,8 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
             '&' -> scanAmp()
             '|' -> scanPipe()
             '%' -> nextEmit(MOD)
-            ETX -> {}
+            ETX -> {
+            }
             else -> nextEmit(UNKNOWN)
         }
     }

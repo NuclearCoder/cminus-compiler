@@ -1,12 +1,10 @@
 package shitcompiler.ast.statement
 
-import shitcompiler.ast.AST
-
 /**
-* Created by NuclearCoder on 03/03/17.
-*/
+ * Created by NuclearCoder on 03/03/17.
+ */
 
-class BlockStatement(val statements: List<AST>) : AST {
+class BlockStatement(val statements: List<Statement>) : Statement {
 
     override fun toString() = "Block {$statements}"
 

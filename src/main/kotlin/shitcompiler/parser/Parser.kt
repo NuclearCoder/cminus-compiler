@@ -1,5 +1,6 @@
 package shitcompiler.parser
 
+import shitcompiler.LONG_SYMBOLS
 import shitcompiler.ast.AST
 import shitcompiler.token.Symbol
 import shitcompiler.token.Symbol.END_TEXT
@@ -9,8 +10,8 @@ import java.io.PrintWriter
 import java.util.*
 
 /**
-* Created by NuclearCoder on 14/01/2017.
-*/
+ * Created by NuclearCoder on 14/01/2017.
+ */
 
 // TODO: error recovery
 
@@ -44,7 +45,10 @@ class Parser(private val symbols: Queue<Int>, private val errors: PrintWriter) {
 
     internal fun expect(expected: Symbol) {
         if (symbol == expected) nextSymbol()
-        else syntaxError()
+        else {
+            if (symbol == Symbol.UNKNOWN) nextSymbol()
+            syntaxError()
+        }
     }
 
     private fun _program(): AST {

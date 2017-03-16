@@ -3,13 +3,13 @@ package shitcompiler
 import shitcompiler.parser.Parser
 import shitcompiler.scanner.Scanner
 import shitcompiler.token.toPrettyString
-import shitcompiler.visitor.symboltable.SymbolTableVisitor
+import shitcompiler.visitor.SymbolTableVisitor
 import java.io.PrintWriter
 import java.io.StringWriter
 
 /**
-* Created by NuclearCoder on 14/01/2017.
-*/
+ * Created by NuclearCoder on 14/01/2017.
+ */
 
 fun main(args: Array<String>) {
     while (true) {

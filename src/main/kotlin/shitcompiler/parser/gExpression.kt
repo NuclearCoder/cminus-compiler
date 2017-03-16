@@ -7,8 +7,8 @@ import shitcompiler.ast.expression.UnaryOp
 import shitcompiler.token.Symbol.*
 
 /**
-* Created by NuclearCoder on 02/03/17.
-*/
+ * Created by NuclearCoder on 02/03/17.
+ */
 
 fun Parser.expression(): Expression {
     var node = term()

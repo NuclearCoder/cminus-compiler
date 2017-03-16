@@ -2,16 +2,24 @@ package shitcompiler.ast.expression
 
 
 /**
-* Created by NuclearCoder on 02/03/17.
-*/
+ * Created by NuclearCoder on 02/03/17.
+ */
 
-sealed class Atom<out T>(open val value: T) : Expression {
+sealed class Atom(val value: Int) : Expression {
 
-    data class Integer(override val value: Int) : Atom<Int>(value)
-    data class Char(override val value: Int) : Atom<Int>(value)
-    data class Identifier(override val value: Int) : Atom<Int>(value)
+    class Integer(value: Int) : Atom(value) {
+        override fun toString() = "int($value)"
+    }
 
-    object Unknown: Atom<Unit>(Unit) {
+    class Char(value: Int) : Atom(value) {
+        override fun toString() = "char($value)"
+    }
+
+    class Identifier(value: Int) : Atom(value) {
+        override fun toString() = "id($value)"
+    }
+
+    object Unknown : Atom(0) {
         override fun toString() = "Unknown"
     }
 

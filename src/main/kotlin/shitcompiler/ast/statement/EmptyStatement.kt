@@ -1,12 +1,10 @@
 package shitcompiler.ast.statement
 
-import shitcompiler.ast.AST
-
 /**
-* Created by NuclearCoder on 03/03/17.
-*/
+ * Created by NuclearCoder on 03/03/17.
+ */
 
-class EmptyStatement : AST {
+class EmptyStatement : Statement {
 
     override fun toString() = "Empty {}"
 

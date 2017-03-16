@@ -1,4 +1,4 @@
-package shitcompiler.visitor.symboltable
+package shitcompiler.visitor
 
 import shitcompiler.ast.AST
 import shitcompiler.ast.expression.Atom
@@ -8,13 +8,19 @@ import shitcompiler.ast.expression.UnaryOp
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
 import shitcompiler.ast.statement.Declaration
+import shitcompiler.ast.type.StructDefinition
+import shitcompiler.symboltable.Kind
+import shitcompiler.symboltable.ObjectRecord
+import shitcompiler.symboltable.SymbolTable
+import shitcompiler.symboltable.classes.Field
+import shitcompiler.symboltable.classes.RecordType
+import shitcompiler.symboltable.classes.VarParam
 import shitcompiler.token.Symbol.*
-import shitcompiler.visitor.ASTVisitor
 import java.io.PrintWriter
 
 /**
-* Created by NuclearCoder on 06/03/17.
-*/
+ * Created by NuclearCoder on 06/03/17.
+ */
 
 class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
 
@@ -30,6 +36,10 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             is BlockStatement -> visitBlock(node)
             is Declaration -> visitDeclaration(node)
             is Assignment -> visitAssignment(node)
+            is StructDefinition -> visitStructDefinition(node)
+            else -> {
+                errors.println("Node type not handled: ${node::class.simpleName}")
+            }
         }
     }
 
@@ -43,16 +53,11 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
 
     private fun visitDeclaration(node: Declaration) {
         val name = node.name
-        val type = when (node.sym) {
-            INT -> typeInt
-            CHAR -> typeChar
-            BOOL -> typeBool
-            else -> {
-                errors.println("Expected type, got ${node.sym}")
-                typeUniversal
-            }
-        }
-        table.define(name, Kind.VARIABLE, VarParam(type))
+        val type = node.type
+
+        val typeObj = table.findOrDefineType(type.name, type.length)
+
+        table.define(name, Kind.VARIABLE, VarParam(typeObj))
     }
 
     private fun visitAssignment(node: Assignment) {
@@ -71,12 +76,28 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         }
     }
 
+    private fun visitStructDefinition(node: StructDefinition) {
+        val fields = mutableListOf<ObjectRecord>()
+
+        for (declaration in node.fields) {
+            val name = declaration.name
+            val type = declaration.type
+
+            val typeObj = table.findOrDefineType(type.name, type.length)
+
+            fields.add(ObjectRecord(name, Kind.VARIABLE, Field(typeObj)))
+        }
+
+        table.define(node.name, Kind.STRUCT_TYPE, RecordType(fields))
+    }
+
     private fun visitExpression(node: Expression): ObjectRecord {
         return when (node) {
             is BinaryOp -> visitBinaryOp(node)
             is UnaryOp -> visitUnaryOp(node)
             is Atom.Identifier -> visitIdentifier(node)
             is Atom.Integer -> visitInteger(node)
+            is Atom.Char -> visitCharacter(node)
             else -> {
                 errors.println("Unexpected expression ${node::class.simpleName}")
                 typeUniversal
@@ -169,6 +190,10 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
 
     private fun visitInteger(node: Atom.Integer): ObjectRecord {
         return table.typeInt
+    }
+
+    private fun visitCharacter(node: Atom.Char): ObjectRecord {
+        return table.typeChar
     }
 
 }
