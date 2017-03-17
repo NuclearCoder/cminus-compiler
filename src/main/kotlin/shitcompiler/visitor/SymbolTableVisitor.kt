@@ -8,12 +8,15 @@ import shitcompiler.ast.expression.UnaryOp
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
 import shitcompiler.ast.statement.Declaration
+import shitcompiler.ast.type.ArrayAccess
+import shitcompiler.ast.type.FieldAccess
 import shitcompiler.ast.type.StructDefinition
+import shitcompiler.ast.type.VariableAccess
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.SymbolTable
 import shitcompiler.symboltable.classes.Field
-import shitcompiler.symboltable.classes.RecordType
+import shitcompiler.symboltable.classes.StructType
 import shitcompiler.symboltable.classes.VarParam
 import shitcompiler.token.Symbol.*
 import java.io.PrintWriter
@@ -52,27 +55,20 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
     }
 
     private fun visitDeclaration(node: Declaration) {
-        val name = node.name
+        val names = node.names
         val type = node.type
 
         val typeObj = table.findOrDefineType(type.name, type.length)
 
-        table.define(name, Kind.VARIABLE, VarParam(typeObj))
+        names.forEach { table.define(it, Kind.VARIABLE, VarParam(typeObj)) }
     }
 
     private fun visitAssignment(node: Assignment) {
-        val name = node.name
-        val type = visitExpression(node.value)
+        val accessType = visitVariableAccess(node.access)
+        val exprType = visitExpression(node.value)
 
-        val obj = table.find(name)
-        when (obj.kind) {
-            Kind.VARIABLE -> {
-                val varType = obj.asVariable().type
-                if (varType != type) {
-                    errors.println("Trying to assign $type to $varType")
-                }
-            }
-            else -> errors.println("Trying to assign a value to kind ${obj.kind}")
+        if (accessType != exprType) {
+            errors.println("Trying to assign $exprType to $accessType")
         }
     }
 
@@ -80,22 +76,22 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         val fields = mutableListOf<ObjectRecord>()
 
         for (declaration in node.fields) {
-            val name = declaration.name
+            val names = declaration.names
             val type = declaration.type
 
             val typeObj = table.findOrDefineType(type.name, type.length)
 
-            fields.add(ObjectRecord(name, Kind.VARIABLE, Field(typeObj)))
+            names.forEach { fields.add(ObjectRecord(it, Kind.VARIABLE, Field(typeObj))) }
         }
 
-        table.define(node.name, Kind.STRUCT_TYPE, RecordType(fields))
+        table.define(node.name, Kind.STRUCT_TYPE, StructType(fields))
     }
 
     private fun visitExpression(node: Expression): ObjectRecord {
         return when (node) {
             is BinaryOp -> visitBinaryOp(node)
             is UnaryOp -> visitUnaryOp(node)
-            is Atom.Identifier -> visitIdentifier(node)
+            is VariableAccess -> visitVariableAccess(node)
             is Atom.Integer -> visitInteger(node)
             is Atom.Char -> visitCharacter(node)
             else -> {
@@ -153,47 +149,90 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         val type = visitExpression(node.operand)
         return when (node.sym) {
             PLUS, MINUS -> {
-                if (type == table.typeInt) {
-                    table.typeInt
+                if (type == typeInt) {
+                    typeInt
                 } else {
                     errors.println("Expected integer expression")
-                    table.typeUniversal
+                    typeUniversal
                 }
             }
             NOT -> {
-                if (type == table.typeBool) {
-                    table.typeBool
+                if (type == typeBool) {
+                    typeBool
                 } else {
                     errors.println("Expected boolean expression")
-                    table.typeUniversal
+                    typeUniversal
                 }
             }
             else -> {
                 errors.println("Unexpected operator ${node.sym}")
-                table.typeUniversal
-            }
-        }
-    }
-
-    private fun visitIdentifier(node: Atom.Identifier): ObjectRecord {
-        val obj = table.find(node.value)
-        return when (obj.kind) {
-            Kind.CONSTANT -> obj.asConstant().type
-            Kind.VARIABLE -> obj.asVariable().type
-            Kind.PARAMETER -> obj.asParameter().type
-            else -> {
-                errors.println("Identifier must refer to a constant, variable or parameter")
                 typeUniversal
             }
         }
     }
 
     private fun visitInteger(node: Atom.Integer): ObjectRecord {
-        return table.typeInt
+        return typeInt
     }
 
     private fun visitCharacter(node: Atom.Char): ObjectRecord {
-        return table.typeChar
+        return typeChar
+    }
+
+    private fun visitVariableAccess(node: VariableAccess): ObjectRecord {
+        return when (node) {
+            is ArrayAccess -> visitArrayAccess(node)
+            is FieldAccess -> visitFieldAccess(node)
+            else -> {
+                // simple identifier access
+                val obj = table.find(node.id)
+                when (obj.kind) {
+                    Kind.CONSTANT -> obj.asConstant().type
+                    Kind.VARIABLE -> obj.asVariable().type
+                    Kind.PARAMETER -> obj.asParameter().type
+                    else -> {
+                        errors.println("Identifier must refer to a constant, variable or parameter")
+                        typeUniversal
+                    }
+                }
+            }
+        }
+    }
+
+    private fun visitArrayAccess(node: ArrayAccess): ObjectRecord {
+        // check it's an array
+        val type = visitVariableAccess(node.access)
+        return if (type.kind == Kind.ARRAY_TYPE) {
+            val selectorType = visitExpression(node.selector)
+            if (selectorType == typeInt) {
+                type.asArrayType().elementType
+            } else {
+                errors.println("Indexed selector must be an integer expression")
+                typeUniversal
+            }
+        } else {
+            errors.println("Indexed selector must act on an array")
+            typeUniversal
+        }
+    }
+
+    private fun visitFieldAccess(node: FieldAccess): ObjectRecord {
+        // check it's a struct
+        val type = visitVariableAccess(node.access)
+        return if (type.kind == Kind.STRUCT_TYPE) {
+            // find the field
+            val field = node.field
+            val obj = type.asStructType().fields.firstOrNull { it.name == field }
+            if (obj != null) {
+                obj.asField().type
+            } else {
+                errors.println("Undeclared field $field")
+                typeUniversal
+            }
+        } else {
+            errors.println("Field selector must act on a struct")
+            typeUniversal
+        }
     }
 
 }

@@ -43,9 +43,7 @@ fun Parser.factor(): Expression {
             return Atom.Char(value)
         }
         ID -> {
-            val value = argument
-            expect(ID)
-            return Atom.Identifier(value)
+            return variableAccess()
         }
         in UNARY_SYMBOLS -> {
             val sym = symbol

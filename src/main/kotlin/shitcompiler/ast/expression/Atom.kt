@@ -15,10 +15,6 @@ sealed class Atom(val value: Int) : Expression {
         override fun toString() = "char($value)"
     }
 
-    class Identifier(value: Int) : Atom(value) {
-        override fun toString() = "id($value)"
-    }
-
     object Unknown : Atom(0) {
         override fun toString() = "Unknown"
     }

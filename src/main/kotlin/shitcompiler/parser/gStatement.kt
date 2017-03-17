@@ -37,19 +37,13 @@ fun Parser.structStatement(): Statement {
 
 fun Parser.declarationStatement(): Declaration {
     val type = typeReference()
-
-    // TODO: replace with variable group
-    val name = argument
-    expect(ID)
-
+    val names = nameGroup()
     expect(SEMICOLON)
-    return Declaration(type, name)
+    return Declaration(type, names)
 }
 
 fun Parser.assignmentStatement(): Assignment {
-    // TODO: replace with variable access
-    val name = argument
-    expect(ID)
+    val access = variableAccess()
 
     val sym = symbol
     if (symbol in ASSIGNMENT_SYMBOLS) {
@@ -59,7 +53,7 @@ fun Parser.assignmentStatement(): Assignment {
     }
     val value = expression()
     expect(SEMICOLON)
-    return Assignment(sym, name, value)
+    return Assignment(sym, access, value)
 }
 
 fun Parser.blockStatement(): BlockStatement {

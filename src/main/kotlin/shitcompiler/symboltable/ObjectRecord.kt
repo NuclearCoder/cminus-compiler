@@ -11,7 +11,7 @@ data class ObjectRecord(val name: Int, val kind: Kind, val data: ObjectClass) {
 
     fun asConstant() = data as Constant
     fun asArrayType() = data as ArrayType
-    fun asRecordType() = data as RecordType
+    fun asStructType() = data as StructType
     fun asField() = data as Field
     fun asVariable() = data as VarParam
     fun asParameter() = data as VarParam
