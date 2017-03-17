@@ -16,13 +16,16 @@ fun Parser.functionCall(name: Int): FunctionCall {
 
     val parameters = mutableListOf<Expression>()
 
-    parameters.add(expression())
-    while (symbol == COMMA) {
-        expect(COMMA)
+    if (symbol != RIGHT_PARENTHESIS) {
         parameters.add(expression())
+        while (symbol == COMMA) {
+            expect(COMMA)
+            parameters.add(expression())
+        }
     }
 
     expect(RIGHT_PARENTHESIS)
+
     return FunctionCall(name, parameters)
 }
 

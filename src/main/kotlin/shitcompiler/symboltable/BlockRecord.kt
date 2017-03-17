@@ -4,7 +4,7 @@ package shitcompiler.symboltable
  * Created by NuclearCoder on 06/03/17.
  */
 
-internal class BlockRecord {
+internal class BlockRecord(val level: Int) {
 
     private val records = mutableListOf<ObjectRecord>()
 
@@ -23,9 +23,11 @@ internal class BlockRecord {
     }
 
     fun define(name: Int, kind: Kind, data: ObjectClass): ObjectRecord {
-        val obj = ObjectRecord(name, kind, data)
+        val obj = ObjectRecord(name, kind, data, level)
         records.add(obj)
         return obj
     }
+
+    override fun toString() = "BlockRecord $records"
 
 }

@@ -7,8 +7,8 @@ import shitcompiler.ast.AST
  */
 
 // if length is negative, the type is not considered an array
-class TypeReference(val name: Int, val length: Int) : AST {
+open class TypeReference(val name: Int) : AST {
 
-    override fun toString() = "type($name)" + (if (length < 0) "" else "[$length]")
+    override fun toString() = "type($name)"
 
 }

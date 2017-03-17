@@ -5,6 +5,7 @@ import shitcompiler.NAME_CHAR
 import shitcompiler.NAME_INT
 import shitcompiler.NO_NAME
 import shitcompiler.ast.statement.Declaration
+import shitcompiler.ast.type.ArrayTypeReference
 import shitcompiler.ast.type.StructDefinition
 import shitcompiler.ast.type.TypeReference
 import shitcompiler.token.Symbol.*
@@ -41,17 +42,18 @@ fun Parser.typeName(): Int {
 
 fun Parser.typeReference(): TypeReference {
     /* a type is either a type or an array type*/
-    val name = typeName()
-    val length: Int
-    if (symbol == LEFT_BRACKET) {
+    var reference = TypeReference(typeName())
+
+    while (symbol == LEFT_BRACKET) {
         expect(LEFT_BRACKET)
-        length = argument
+        val length = argument
         expect(NUM_CONST)
         expect(RIGHT_BRACKET)
-    } else {
-        length = -1
+
+        reference = ArrayTypeReference(reference, length)
     }
-    return TypeReference(name, length)
+
+    return reference
 }
 
 fun Parser.structTypeDefinition(): StructDefinition {

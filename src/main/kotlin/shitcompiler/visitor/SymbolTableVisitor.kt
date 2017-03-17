@@ -7,6 +7,7 @@ import shitcompiler.ast.function.FunctionDefinition
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
 import shitcompiler.ast.statement.Declaration
+import shitcompiler.ast.statement.EmptyStatement
 import shitcompiler.ast.type.ArrayAccess
 import shitcompiler.ast.type.FieldAccess
 import shitcompiler.ast.type.StructDefinition
@@ -40,17 +41,23 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             is Assignment -> visitAssignment(node)
             is StructDefinition -> visitStructDefinition(node)
             is FunctionDefinition -> visitFunctionDefinition(node)
+            is FunctionCall -> visitFunctionCall(node)
+
+            is EmptyStatement -> Unit
             else -> {
                 errors.println("Node type not handled: ${node::class.simpleName}")
             }
         }
     }
 
-    private fun visitBlock(node: BlockStatement) {
+    private fun visitBlock(node: BlockStatement, before: () -> Unit = {}) {
         table.beginBlock()
+        before()
+
         for (statement in node.statements) {
             visit(statement)
         }
+
         table.endBlock()
     }
 
@@ -58,7 +65,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         val names = node.names
         val type = node.type
 
-        val typeObj = table.findOrDefineType(type.name, type.length)
+        val typeObj = table.findOrDefineType(type)
 
         names.forEach { table.define(it, Kind.VARIABLE, VarParam(typeObj)) }
     }
@@ -79,31 +86,30 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             val names = declaration.names
             val type = declaration.type
 
-            val typeObj = table.findOrDefineType(type.name, type.length)
+            val typeObj = table.findOrDefineType(type)
 
-            names.forEach { fields.add(ObjectRecord(it, Kind.VARIABLE, Field(typeObj))) }
+            names.forEach { fields.add(ObjectRecord(it, Kind.FIELD, Field(typeObj), 0)) }
         }
 
         table.define(node.name, Kind.STRUCT_TYPE, StructType(fields))
     }
 
     private fun visitFunctionDefinition(node: FunctionDefinition) {
-        val returnType = node.returnType.let { table.findOrDefineType(it.name, it.length) }
+        val returnType = table.findOrDefineType(node.returnType)
         val paramObjs = mutableListOf<ObjectRecord>()
 
         for (parameter in node.parameters) {
             val name = parameter.name
             val type = parameter.type
 
-            val typeObj = table.findOrDefineType(type.name, type.length)
+            val typeObj = table.findOrDefineType(type)
 
-            paramObjs.add(ObjectRecord(name, Kind.PARAMETER, VarParam(typeObj)))
+            paramObjs.add(ObjectRecord(name, Kind.PARAMETER, VarParam(typeObj), 0))
         }
 
         table.define(node.name, Kind.FUNCTION, FunctionR(returnType, paramObjs))
 
-        // TODO: add function scope
-        visitBlock(node.block)
+        visitBlock(node.block) { paramObjs.forEach({ table.define(it.name, Kind.VARIABLE, it.data) }) }
     }
 
     private fun visitExpression(node: Expression): ObjectRecord {

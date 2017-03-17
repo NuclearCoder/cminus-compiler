@@ -11,7 +11,7 @@ import shitcompiler.token.Symbol.*
 fun Parser.statementList(): List<Statement> {
     val statements = mutableListOf<Statement>()
     while (symbol in STATEMENT_SYMBOLS) {
-        statements.add(statement())
+        statement().let { if (it !is EmptyStatement) statements.add(it) }
     }
     return statements
 }
@@ -21,7 +21,7 @@ fun Parser.statement(): Statement {
         BEGIN -> blockStatement()
         STRUCT -> structStatement()
         INT, CHAR, BOOL -> declarationOrFunctionStatement()
-        ID -> assignmentStatement()
+        ID -> assignmentOrFunctionStatement()
         SEMICOLON -> emptyStatement()
         else -> {
             syntaxError()
@@ -63,8 +63,21 @@ fun Parser.declarationStatement(firstName: Int, type: TypeReference): Declaratio
     return Declaration(type, names)
 }
 
-fun Parser.assignmentStatement(): Assignment {
-    val access = variableAccess()
+fun Parser.assignmentOrFunctionStatement(): Statement {
+    val name = argument
+    expect(ID)
+
+    // it might be a function call
+    if (symbol == LEFT_PARENTHESIS) {
+        return functionCall(name)
+    } else {
+        return assignmentStatement(name)
+    }
+
+}
+
+fun Parser.assignmentStatement(name: Int): Assignment {
+    val access = variableAccess(name)
 
     val sym = symbol
     if (symbol in ASSIGNMENT_SYMBOLS) {
@@ -84,7 +97,7 @@ fun Parser.blockStatement(): BlockStatement {
     return BlockStatement(statements)
 }
 
-fun Parser.emptyStatement(): EmptyStatement {
+fun Parser.emptyStatement(): Statement {
     expect(SEMICOLON)
     return EmptyStatement()
 }

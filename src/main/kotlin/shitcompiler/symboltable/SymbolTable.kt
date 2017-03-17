@@ -2,6 +2,8 @@ package shitcompiler.symboltable
 
 import shitcompiler.NO_NAME
 import shitcompiler.UNNAMED
+import shitcompiler.ast.type.ArrayTypeReference
+import shitcompiler.ast.type.TypeReference
 import shitcompiler.symboltable.classes.ArrayType
 import shitcompiler.symboltable.classes.Constant
 import shitcompiler.symboltable.classes.Nothing
@@ -20,7 +22,7 @@ class SymbolTable(private val errors: PrintWriter) {
     val stdTrue: ObjectRecord
     val stdFalse: ObjectRecord
 
-    private val blocks = arrayListOf(BlockRecord())
+    private val blocks = arrayListOf(BlockRecord(0))
 
     // the 0-th level is the standard level
     private var currentLevel: Int = 0
@@ -34,32 +36,40 @@ class SymbolTable(private val errors: PrintWriter) {
         typeBool = define(i++, Kind.STANDARD_TYPE)
 
         stdTrue = define(i++, Kind.CONSTANT, Constant(1, typeBool))
-        stdFalse = define(i++, Kind.CONSTANT, Constant(0, typeBool))
+        stdFalse = define(i, Kind.CONSTANT, Constant(0, typeBool))
     }
 
-    fun findOrDefineType(name: Int, length: Int): ObjectRecord {
-        val elementType = find(name)
+    fun findOrDefineType(type: TypeReference): ObjectRecord {
+        val elementType = if (type is ArrayTypeReference) {
+            findOrDefineType(type.elementType)
+        } else {
+            find(type.name)
+        }
+
         if (elementType.kind != Kind.STANDARD_TYPE
+                && elementType.kind != Kind.ARRAY_TYPE
                 && elementType.kind != Kind.STRUCT_TYPE) {
-            errors.println("Wrong kind for $name, got ${elementType.kind}, expected ${Kind.STANDARD_TYPE} or ${Kind.STRUCT_TYPE}")
+            errors.println("Type reference was ${elementType.kind}, expected ${Kind.STANDARD_TYPE}, ${Kind.ARRAY_TYPE} or ${Kind.STRUCT_TYPE}")
             return typeUniversal
         }
 
-        // if standard type, just return
-        if (length < 0) return elementType
+        if (type is ArrayTypeReference) {
+            val elementTypeBlock = blocks[elementType.blockLevel]
+            val length = type.length
 
-        // array types are always defined in the standard level
+            // array types are defined in the same level as the element type
+            val obj = elementTypeBlock.firstOrNull {
+                it.name == UNNAMED && it.kind == Kind.ARRAY_TYPE
+                        && it.asArrayType().elementType == elementType
+                        && it.asArrayType().length == length
+            }
 
-        // the standard level might keep references from types higher up after they go out of scope
-        // to prevent this, #endBlock will scan the standard block to clean these up
-        val obj = blocks[0].firstOrNull {
-            it.name == UNNAMED && it.kind == Kind.ARRAY_TYPE
-                    && it.asArrayType().elementType == elementType
-                    && it.asArrayType().length == length
+            if (obj != null) return obj
+            return elementTypeBlock.define(UNNAMED, Kind.ARRAY_TYPE, ArrayType(elementType, length))
+        } else {
+            // if standard type, just return
+            return elementType
         }
-
-        if (obj != null) return obj
-        return define(UNNAMED, Kind.ARRAY_TYPE, ArrayType(elementType, length))
     }
 
     fun find(name: Int): ObjectRecord {
@@ -81,18 +91,14 @@ class SymbolTable(private val errors: PrintWriter) {
     }
 
     fun beginBlock() {
-        if (++currentLevel == blocks.size) {
-            blocks.add(BlockRecord())
+        currentLevel++
+        if (currentLevel == blocks.size) {
+            blocks.add(BlockRecord(currentLevel))
         }
     }
 
     fun endBlock() {
         val block = blocks[currentLevel]
-
-        // remove any dead reference from the standard level
-        val deadTypes = block.filter { it.kind == Kind.STRUCT_TYPE }
-        blocks[0].removeIf { it.kind == Kind.ARRAY_TYPE && it.asArrayType().elementType in deadTypes }
-
         block.clear()
         currentLevel--
     }

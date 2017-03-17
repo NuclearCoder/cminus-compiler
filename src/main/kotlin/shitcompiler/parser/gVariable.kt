@@ -22,12 +22,6 @@ fun Parser.nameGroup(firstName: Int): List<Int> {
     return names
 }
 
-fun Parser.variableAccess(): VariableAccess {
-    val name = argument
-    expect(ID)
-    return variableAccess(name)
-}
-
 fun Parser.variableAccess(name: Int): VariableAccess {
     var access = VariableAccess(name)
     while (symbol in SELECTOR_SYMBOLS) {
