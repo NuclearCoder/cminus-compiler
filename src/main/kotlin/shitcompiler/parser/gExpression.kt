@@ -12,7 +12,7 @@ import shitcompiler.token.Symbol.*
 
 fun Parser.expression(): Expression {
     var node = term()
-    while (symbol in ADD_SYMBOLS) {
+    while (symbol in EXPRESSION_SYMBOLS) {
         val sym = symbol
         expect(symbol)
         node = BinaryOp(sym, node, term())
@@ -22,7 +22,7 @@ fun Parser.expression(): Expression {
 
 fun Parser.term(): Expression {
     var node = factor()
-    while (symbol in MULTIPLY_SYMBOLS) {
+    while (symbol in TERM_SYMBOLS) {
         val sym = symbol
         expect(symbol)
         node = BinaryOp(sym, node, factor())

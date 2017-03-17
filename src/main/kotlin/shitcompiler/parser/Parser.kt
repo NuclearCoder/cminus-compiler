@@ -13,9 +13,7 @@ import java.util.*
  * Created by NuclearCoder on 14/01/2017.
  */
 
-// TODO: error recovery
-
-class Parser(private val symbols: Queue<Int>, private val errors: PrintWriter) {
+class Parser(private val symbols: Queue<Int>, val errors: PrintWriter) {
 
     internal var symbol = Symbol.UNKNOWN
     internal var argument: Int = 0
@@ -25,7 +23,12 @@ class Parser(private val symbols: Queue<Int>, private val errors: PrintWriter) {
     fun execute(): AST {
         nextSymbol()
 
-        return _program()
+        val root = program()
+
+        if (symbol != END_TEXT)
+            syntaxError()
+
+        return root
     }
 
     private fun nextSymbol() {
@@ -49,15 +52,6 @@ class Parser(private val symbols: Queue<Int>, private val errors: PrintWriter) {
             if (symbol == Symbol.UNKNOWN) nextSymbol()
             syntaxError()
         }
-    }
-
-    private fun _program(): AST {
-        val root = blockStatement()
-
-        if (symbol != END_TEXT)
-            syntaxError()
-
-        return root
     }
 
 }

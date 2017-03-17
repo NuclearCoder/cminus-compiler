@@ -10,9 +10,11 @@ import shitcompiler.token.Symbol.*
 
 fun Parser.statementList(): List<Statement> {
     val statements = mutableListOf<Statement>()
+
     while (symbol in STATEMENT_SYMBOLS) {
         statement().let { if (it !is EmptyStatement) statements.add(it) }
     }
+
     return statements
 }
 
@@ -73,14 +75,13 @@ fun Parser.assignmentOrFunctionStatement(): Statement {
     } else {
         return assignmentStatement(name)
     }
-
 }
 
 fun Parser.assignmentStatement(name: Int): Assignment {
     val access = variableAccess(name)
 
     val sym = symbol
-    if (symbol in ASSIGNMENT_SYMBOLS) {
+    if (symbol in ASSIGN_OP_SYMBOLS) {
         expect(symbol)
     } else {
         syntaxError()

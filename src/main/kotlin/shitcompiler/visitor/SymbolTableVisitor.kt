@@ -1,6 +1,7 @@
 package shitcompiler.visitor
 
 import shitcompiler.ast.AST
+import shitcompiler.ast.Program
 import shitcompiler.ast.expression.*
 import shitcompiler.ast.function.FunctionCall
 import shitcompiler.ast.function.FunctionDefinition
@@ -36,6 +37,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
 
     override fun visit(node: AST) {
         when (node) {
+            is Program -> visitProgram(node)
             is BlockStatement -> visitBlock(node)
             is Declaration -> visitDeclaration(node)
             is Assignment -> visitAssignment(node)
@@ -48,6 +50,14 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
                 errors.println("Node type not handled: ${node::class.simpleName}")
             }
         }
+    }
+
+    private fun visitProgram(node: Program) {
+        table.beginBlock()
+        for (statement in node.statements) {
+            visit(statement)
+        }
+        table.endBlock()
     }
 
     private fun visitBlock(node: BlockStatement, before: () -> Unit = {}) {
