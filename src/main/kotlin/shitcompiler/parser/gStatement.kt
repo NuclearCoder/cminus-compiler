@@ -1,6 +1,7 @@
 package shitcompiler.parser
 
 import shitcompiler.ast.statement.*
+import shitcompiler.ast.type.TypeReference
 import shitcompiler.token.Symbol.*
 
 /**
@@ -19,7 +20,7 @@ fun Parser.statement(): Statement {
     return when (symbol) {
         BEGIN -> blockStatement()
         STRUCT -> structStatement()
-        INT, CHAR, BOOL -> declarationStatement()
+        INT, CHAR, BOOL -> declarationOrFunctionStatement()
         ID -> assignmentStatement()
         SEMICOLON -> emptyStatement()
         else -> {
@@ -31,13 +32,33 @@ fun Parser.statement(): Statement {
 
 fun Parser.structStatement(): Statement {
     expect(STRUCT)
-    return if (symbol == ID) declarationStatement()
+    return if (symbol == ID) declarationOrFunctionStatement()
     else structTypeDefinition()
+}
+
+fun Parser.declarationOrFunctionStatement(): Statement {
+    val type = typeReference()
+
+    val name = argument
+    expect(ID)
+
+    // it might be a function definition
+    if (symbol == LEFT_PARENTHESIS) {
+        return functionDefinition(name, type)
+    } else {
+        return declarationStatement(name, type)
+    }
 }
 
 fun Parser.declarationStatement(): Declaration {
     val type = typeReference()
-    val names = nameGroup()
+    val name = argument
+    expect(ID)
+    return declarationStatement(name, type)
+}
+
+fun Parser.declarationStatement(firstName: Int, type: TypeReference): Declaration {
+    val names = nameGroup(firstName)
     expect(SEMICOLON)
     return Declaration(type, names)
 }

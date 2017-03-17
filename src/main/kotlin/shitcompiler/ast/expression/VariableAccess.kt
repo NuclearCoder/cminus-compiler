@@ -1,6 +1,4 @@
-package shitcompiler.ast.type
-
-import shitcompiler.ast.expression.Expression
+package shitcompiler.ast.expression
 
 /**
  * Created by NuclearCoder on 17/03/17.

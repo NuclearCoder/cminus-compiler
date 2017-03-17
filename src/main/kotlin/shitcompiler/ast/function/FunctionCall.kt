@@ -8,6 +8,6 @@ import shitcompiler.ast.expression.Expression
 
 class FunctionCall(val name: Int, val parameters: List<Expression>) : Expression {
 
-    override fun toString() = "FunctionCall $name$parameters"
+    override fun toString() = "FunctionCall id($name) $parameters"
 
 }

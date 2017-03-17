@@ -8,6 +8,6 @@ import shitcompiler.ast.type.TypeReference
 
 class Declaration(val type: TypeReference, val names: List<Int>) : Statement {
 
-    override fun toString() = "Declaration {$type${names.map { "id($it)" }}}"
+    override fun toString() = "Declaration $type${names.map { "id($it)" }}"
 
 }

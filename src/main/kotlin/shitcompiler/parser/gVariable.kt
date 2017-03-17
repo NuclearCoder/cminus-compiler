@@ -1,20 +1,18 @@
 package shitcompiler.parser
 
 import shitcompiler.ast.expression.Expression
+import shitcompiler.ast.expression.VariableAccess
 import shitcompiler.ast.type.ArrayAccess
 import shitcompiler.ast.type.FieldAccess
-import shitcompiler.ast.type.VariableAccess
 import shitcompiler.token.Symbol.*
 
 /**
  * Created by NuclearCoder on 16/03/17.
  */
 
-fun Parser.nameGroup(): List<Int> {
-    val names = mutableListOf<Int>()
+fun Parser.nameGroup(firstName: Int): List<Int> {
+    val names = mutableListOf(firstName)
 
-    names.add(argument)
-    expect(ID)
     while (symbol == COMMA) {
         expect(COMMA)
         names.add(argument)

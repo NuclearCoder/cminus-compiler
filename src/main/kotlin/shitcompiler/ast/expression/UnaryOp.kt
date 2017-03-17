@@ -8,5 +8,5 @@ import shitcompiler.token.Symbol
 
 class UnaryOp(val sym: Symbol, val operand: Expression) : Expression {
 
-    override fun toString() = "UnaryOp ($sym $operand)"
+    override fun toString() = "UnaryOp $sym $operand"
 }

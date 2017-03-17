@@ -1,7 +1,7 @@
 package shitcompiler.ast.statement
 
 import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.type.VariableAccess
+import shitcompiler.ast.expression.VariableAccess
 import shitcompiler.token.Symbol
 
 /**
@@ -10,6 +10,6 @@ import shitcompiler.token.Symbol
 
 class Assignment(val sym: Symbol, val access: VariableAccess, val value: Expression) : Statement {
 
-    override fun toString() = "Assignment {$access $sym $value}"
+    override fun toString() = "Assignment $access $sym $value"
 
 }

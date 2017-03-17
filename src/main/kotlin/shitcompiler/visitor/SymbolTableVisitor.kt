@@ -1,22 +1,20 @@
 package shitcompiler.visitor
 
 import shitcompiler.ast.AST
-import shitcompiler.ast.expression.Atom
-import shitcompiler.ast.expression.BinaryOp
-import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.expression.UnaryOp
+import shitcompiler.ast.expression.*
 import shitcompiler.ast.function.FunctionCall
+import shitcompiler.ast.function.FunctionDefinition
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
 import shitcompiler.ast.statement.Declaration
 import shitcompiler.ast.type.ArrayAccess
 import shitcompiler.ast.type.FieldAccess
 import shitcompiler.ast.type.StructDefinition
-import shitcompiler.ast.type.VariableAccess
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.SymbolTable
 import shitcompiler.symboltable.classes.Field
+import shitcompiler.symboltable.classes.FunctionR
 import shitcompiler.symboltable.classes.StructType
 import shitcompiler.symboltable.classes.VarParam
 import shitcompiler.token.Symbol.*
@@ -41,6 +39,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             is Declaration -> visitDeclaration(node)
             is Assignment -> visitAssignment(node)
             is StructDefinition -> visitStructDefinition(node)
+            is FunctionDefinition -> visitFunctionDefinition(node)
             else -> {
                 errors.println("Node type not handled: ${node::class.simpleName}")
             }
@@ -86,6 +85,25 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         }
 
         table.define(node.name, Kind.STRUCT_TYPE, StructType(fields))
+    }
+
+    private fun visitFunctionDefinition(node: FunctionDefinition) {
+        val returnType = node.returnType.let { table.findOrDefineType(it.name, it.length) }
+        val paramObjs = mutableListOf<ObjectRecord>()
+
+        for (parameter in node.parameters) {
+            val name = parameter.name
+            val type = parameter.type
+
+            val typeObj = table.findOrDefineType(type.name, type.length)
+
+            paramObjs.add(ObjectRecord(name, Kind.PARAMETER, VarParam(typeObj)))
+        }
+
+        table.define(node.name, Kind.FUNCTION, FunctionR(returnType, paramObjs))
+
+        // TODO: add function scope
+        visitBlock(node.block)
     }
 
     private fun visitExpression(node: Expression): ObjectRecord {

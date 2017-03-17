@@ -6,6 +6,6 @@ package shitcompiler.ast.statement
 
 class EmptyStatement : Statement {
 
-    override fun toString() = "Empty {}"
+    override fun toString() = "Empty"
 
 }

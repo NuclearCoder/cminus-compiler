@@ -6,6 +6,6 @@ package shitcompiler.ast.statement
 
 class BlockStatement(val statements: List<Statement>) : Statement {
 
-    override fun toString() = "Block {$statements}"
+    override fun toString() = "Block $statements"
 
 }
