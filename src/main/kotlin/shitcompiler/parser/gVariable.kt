@@ -27,7 +27,10 @@ fun Parser.nameGroup(): List<Int> {
 fun Parser.variableAccess(): VariableAccess {
     val name = argument
     expect(ID)
+    return variableAccess(name)
+}
 
+fun Parser.variableAccess(name: Int): VariableAccess {
     var access = VariableAccess(name)
     while (symbol in SELECTOR_SYMBOLS) {
         if (symbol == LEFT_BRACKET) {

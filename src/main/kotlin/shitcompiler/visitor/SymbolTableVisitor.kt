@@ -5,6 +5,7 @@ import shitcompiler.ast.expression.Atom
 import shitcompiler.ast.expression.BinaryOp
 import shitcompiler.ast.expression.Expression
 import shitcompiler.ast.expression.UnaryOp
+import shitcompiler.ast.function.FunctionCall
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
 import shitcompiler.ast.statement.Declaration
@@ -92,6 +93,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             is BinaryOp -> visitBinaryOp(node)
             is UnaryOp -> visitUnaryOp(node)
             is VariableAccess -> visitVariableAccess(node)
+            is FunctionCall -> visitFunctionCall(node)
             is Atom.Integer -> visitInteger(node)
             is Atom.Char -> visitCharacter(node)
             else -> {
@@ -171,21 +173,13 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         }
     }
 
-    private fun visitInteger(node: Atom.Integer): ObjectRecord {
-        return typeInt
-    }
-
-    private fun visitCharacter(node: Atom.Char): ObjectRecord {
-        return typeChar
-    }
-
     private fun visitVariableAccess(node: VariableAccess): ObjectRecord {
         return when (node) {
             is ArrayAccess -> visitArrayAccess(node)
             is FieldAccess -> visitFieldAccess(node)
             else -> {
                 // simple identifier access
-                val obj = table.find(node.id)
+                val obj = table.find(node.name)
                 when (obj.kind) {
                     Kind.CONSTANT -> obj.asConstant().type
                     Kind.VARIABLE -> obj.asVariable().type
@@ -233,6 +227,44 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             errors.println("Field selector must act on a struct")
             typeUniversal
         }
+    }
+
+    private fun visitFunctionCall(node: FunctionCall): ObjectRecord {
+        val name = node.name
+        val obj = table.find(name)
+        return if (obj.kind == Kind.FUNCTION) {
+            val function = obj.asFunction()
+            // check one-to-one equality between call parameters and function parameters
+            val formal = function.parameters
+            val params = node.parameters
+
+            if (formal.size == params.size) {
+                for (i in 0..formal.lastIndex) {
+                    val formalType = formal[i].asParameter().type
+                    val paramType = visitExpression(params[i])
+
+                    if (formalType != paramType) {
+                        errors.println("Parameter #$i has type $paramType, expected $formalType")
+                        return typeUniversal
+                    }
+                }
+                function.returnType
+            } else {
+                errors.println("Function parameter count does not match given parameter count")
+                typeUniversal
+            }
+        } else {
+            errors.println("Function call on $name which is not a function")
+            typeUniversal
+        }
+    }
+
+    private fun visitInteger(node: Atom.Integer): ObjectRecord {
+        return typeInt
+    }
+
+    private fun visitCharacter(node: Atom.Char): ObjectRecord {
+        return typeChar
     }
 
 }

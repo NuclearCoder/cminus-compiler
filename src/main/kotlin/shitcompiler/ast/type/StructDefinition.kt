@@ -9,6 +9,6 @@ import shitcompiler.ast.statement.Statement
 
 class StructDefinition(val name: Int, val fields: List<Declaration>) : Statement {
 
-    override fun toString() = "Struct (id($name), $fields)"
+    override fun toString() = "Struct id($name) $fields"
 
 }

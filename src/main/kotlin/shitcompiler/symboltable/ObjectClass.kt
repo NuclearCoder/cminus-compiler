@@ -11,6 +11,7 @@ enum class Kind {
     STANDARD_TYPE,
     ARRAY_TYPE,
     STRUCT_TYPE,
+    FUNCTION,
     FIELD,
     VARIABLE,
     PARAMETER,

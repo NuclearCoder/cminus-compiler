@@ -43,7 +43,15 @@ fun Parser.factor(): Expression {
             return Atom.Char(value)
         }
         ID -> {
-            return variableAccess()
+            val name = argument
+            expect(ID)
+
+            // it might be a function call
+            if (symbol == LEFT_PARENTHESIS) {
+                return functionCall(name)
+            } else {
+                return variableAccess(name)
+            }
         }
         in UNARY_SYMBOLS -> {
             val sym = symbol
