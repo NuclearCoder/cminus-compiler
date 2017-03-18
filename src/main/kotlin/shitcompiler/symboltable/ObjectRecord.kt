@@ -13,6 +13,7 @@ data class ObjectRecord(val name: Int, val kind: Kind, val data: ObjectClass, va
     fun asArrayType() = data as ArrayType
     fun asStructType() = data as StructType
     fun asFunction() = data as FunctionR
+    fun asProcedure() = data as Procedure
     fun asField() = data as Field
     fun asVariable() = data as VarParam
     fun asParameter() = data as VarParam

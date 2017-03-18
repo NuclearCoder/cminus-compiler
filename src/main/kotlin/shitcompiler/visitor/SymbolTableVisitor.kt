@@ -5,6 +5,8 @@ import shitcompiler.ast.Program
 import shitcompiler.ast.expression.*
 import shitcompiler.ast.function.FunctionCall
 import shitcompiler.ast.function.FunctionDefinition
+import shitcompiler.ast.function.FunctionOrProcedureDefinition
+import shitcompiler.ast.function.ProcedureDefinition
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
 import shitcompiler.ast.statement.Declaration
@@ -15,10 +17,7 @@ import shitcompiler.ast.type.StructDefinition
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.SymbolTable
-import shitcompiler.symboltable.classes.Field
-import shitcompiler.symboltable.classes.FunctionR
-import shitcompiler.symboltable.classes.StructType
-import shitcompiler.symboltable.classes.VarParam
+import shitcompiler.symboltable.classes.*
 import shitcompiler.token.Symbol.*
 import java.io.PrintWriter
 
@@ -43,6 +42,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             is Assignment -> visitAssignment(node)
             is StructDefinition -> visitStructDefinition(node)
             is FunctionDefinition -> visitFunctionDefinition(node)
+            is ProcedureDefinition -> visitFunctionDefinition(node)
             is FunctionCall -> visitFunctionCall(node)
 
             is EmptyStatement -> Unit
@@ -104,8 +104,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
         table.define(node.name, Kind.STRUCT_TYPE, StructType(fields))
     }
 
-    private fun visitFunctionDefinition(node: FunctionDefinition) {
-        val returnType = table.findOrDefineType(node.returnType)
+    private fun visitFunctionDefinition(node: FunctionOrProcedureDefinition) {
         val paramObjs = mutableListOf<ObjectRecord>()
 
         for (parameter in node.parameters) {
@@ -117,7 +116,12 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
             paramObjs.add(ObjectRecord(name, Kind.PARAMETER, VarParam(typeObj), 0))
         }
 
-        table.define(node.name, Kind.FUNCTION, FunctionR(returnType, paramObjs))
+        if (node is FunctionDefinition) {
+            val returnType = table.findOrDefineType(node.returnType)
+            table.define(node.name, Kind.FUNCTION, FunctionR(returnType, paramObjs))
+        } else { // node is ProcedureDefinition
+            table.define(node.name, Kind.PROCEDURE, Procedure(paramObjs))
+        }
 
         visitBlock(node.block) { paramObjs.forEach({ table.define(it.name, Kind.VARIABLE, it.data) }) }
     }
@@ -278,7 +282,7 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
                     val paramType = visitExpression(params[i])
 
                     if (formalType != paramType) {
-                        errors.println("Parameter #$i has type $paramType, expected $formalType")
+                        errors.println("Parameter ${i + 1}-th has type $paramType, expected $formalType")
                         return typeUniversal
                     }
                 }
@@ -287,6 +291,8 @@ class SymbolTableVisitor(private val errors: PrintWriter) : ASTVisitor {
                 errors.println("Function parameter count does not match given parameter count")
                 typeUniversal
             }
+        } else if (obj.kind == Kind.PROCEDURE) {
+            typeUniversal
         } else {
             errors.println("Function call on $name which is not a function")
             typeUniversal

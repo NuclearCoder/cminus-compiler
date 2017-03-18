@@ -4,6 +4,8 @@ import shitcompiler.ast.expression.Expression
 import shitcompiler.ast.function.FunctionCall
 import shitcompiler.ast.function.FunctionDefinition
 import shitcompiler.ast.function.FunctionParameter
+import shitcompiler.ast.function.ProcedureDefinition
+import shitcompiler.ast.statement.Statement
 import shitcompiler.ast.type.TypeReference
 import shitcompiler.token.Symbol.*
 
@@ -29,25 +31,34 @@ fun Parser.functionCall(name: Int): FunctionCall {
     return FunctionCall(name, parameters)
 }
 
-fun Parser.functionDefinition(name: Int, returnType: TypeReference): FunctionDefinition {
-    expect(LEFT_PARENTHESIS)
-
+fun Parser.functionDefinition(name: Int, returnType: TypeReference?): Statement {
     val parameters = mutableListOf<FunctionParameter>()
 
+    expect(LEFT_PARENTHESIS)
     if (symbol != RIGHT_PARENTHESIS) {
-        parameters.add(functionParameter())
-        while (symbol == COMMA) {
-            expect(COMMA)
+        if (symbol != VOID) {
             parameters.add(functionParameter())
+            while (symbol == COMMA) {
+                expect(COMMA)
+                parameters.add(functionParameter())
+            }
+        } else { // void parameters
+            expect(VOID)
         }
     }
     expect(RIGHT_PARENTHESIS)
 
-    return FunctionDefinition(name, returnType, parameters, blockStatement())
+    val block = blockStatement()
+
+    // procedure / function
+    return if (returnType != null)
+        FunctionDefinition(name, returnType, parameters, block)
+    else
+        ProcedureDefinition(name, parameters, block)
 }
 
 fun Parser.functionParameter(): FunctionParameter {
-    if (symbol == STRUCT)
+    if (symbol == STRUCT) // skip STRUCT if there is - only there for distinction
         expect(STRUCT)
 
     val type = typeReference()

@@ -18,6 +18,7 @@ val KEYWORDS = mapOf(
         "else" to ELSE,
         "return" to RETURN,
         "struct" to STRUCT,
+        "void" to VOID,
         "while" to WHILE
 )
 

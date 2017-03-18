@@ -15,7 +15,7 @@ enum class Symbol(private val s: String) {
     TRUE("true"),
     FALSE("false"),
 
-
+    VOID("void"),
     INT("int"),
     BOOL("bool"),
     CHAR("char"),

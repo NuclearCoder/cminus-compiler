@@ -8,10 +8,14 @@ interface ObjectClass
 
 enum class Kind {
     CONSTANT,
+
     STANDARD_TYPE,
     ARRAY_TYPE,
     STRUCT_TYPE,
+
     FUNCTION,
+    PROCEDURE,
+
     FIELD,
     VARIABLE,
     PARAMETER,
