@@ -70,7 +70,7 @@ fun Parser.declarationStatement(): Declaration {
 fun Parser.declarationStatement(firstName: Int, type: TypeReference): Declaration {
     val names = nameGroup(firstName)
     expect(SEMICOLON)
-    return Declaration(type, names)
+    return Declaration(lineNo, type, names)
 }
 
 fun Parser.assignmentOrFunctionStatement(): Statement {
@@ -79,7 +79,7 @@ fun Parser.assignmentOrFunctionStatement(): Statement {
 
     // it might be a function call
     if (symbol == LEFT_PARENTHESIS) {
-        return functionCall(name)
+        return functionCall(name, isStatement = true) as Statement
     } else {
         return assignmentStatement(name)
     }
@@ -96,17 +96,17 @@ fun Parser.assignmentStatement(name: Int): Assignment {
     }
     val value = expression()
     expect(SEMICOLON)
-    return Assignment(sym, access, value)
+    return Assignment(lineNo, sym, access, value)
 }
 
 fun Parser.blockStatement(): BlockStatement {
     expect(BEGIN)
     val statements = statementList()
     expect(END)
-    return BlockStatement(statements)
+    return BlockStatement(lineNo, statements)
 }
 
 fun Parser.emptyStatement(): Statement {
     expect(SEMICOLON)
-    return EmptyStatement()
+    return EmptyStatement(lineNo)
 }

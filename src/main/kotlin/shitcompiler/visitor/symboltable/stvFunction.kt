@@ -1,8 +1,9 @@
 package shitcompiler.visitor.symboltable
 
-import shitcompiler.ast.function.FunctionCall
-import shitcompiler.ast.function.FunctionDefinition
-import shitcompiler.ast.function.FunctionOrProcedureDefinition
+import shitcompiler.ast.AST
+import shitcompiler.ast.expression.Expression
+import shitcompiler.ast.function.*
+import shitcompiler.println
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.classes.FunctionR
@@ -20,29 +21,37 @@ fun SymbolTableVisitor.visitFunctionDefinition(node: FunctionOrProcedureDefiniti
         val name = parameter.name
         val type = parameter.type
 
-        val typeObj = table.findOrDefineType(type)
+        val typeObj = table.findOrDefineType(node.lineNo, type)
 
         paramObjs.add(ObjectRecord(name, Kind.PARAMETER, VarParam(typeObj), 0))
     }
 
     if (node is FunctionDefinition) {
-        val returnType = table.findOrDefineType(node.returnType)
-        table.define(node.name, Kind.FUNCTION, FunctionR(returnType, paramObjs))
+        val returnType = table.findOrDefineType(node.lineNo, node.returnType)
+        table.define(node.lineNo, node.name, Kind.FUNCTION, FunctionR(returnType, paramObjs))
     } else { // node is ProcedureDefinition
-        table.define(node.name, Kind.PROCEDURE, Procedure(paramObjs))
+        table.define(node.lineNo, node.name, Kind.PROCEDURE, Procedure(paramObjs))
     }
 
-    visitBlock(node.block) { paramObjs.forEach({ table.define(it.name, Kind.VARIABLE, it.data) }) }
+    visitBlock(node.block) {
+        paramObjs.forEach { table.define(node.lineNo, it.name, Kind.VARIABLE, it.data) }
+    }
 }
 
-fun SymbolTableVisitor.visitFunctionCall(node: FunctionCall): ObjectRecord {
-    val name = node.name
-    val obj = table.find(name)
+fun SymbolTableVisitor.visitFunctionCallStatement(node: FunctionCallStatement) {
+    functionCall(node, node.name, node.parameters)
+}
+
+fun SymbolTableVisitor.visitFunctionCallExpression(node: FunctionCallExpression): ObjectRecord {
+    return functionCall(node, node.name, node.parameters)
+}
+
+private fun SymbolTableVisitor.functionCall(node: AST, name: Int, params: List<Expression>): ObjectRecord {
+    val obj = table.find(node.lineNo, name)
     return if (obj.kind == Kind.FUNCTION) {
         val function = obj.asFunction()
         // check one-to-one equality between call parameters and function parameters
         val formal = function.parameters
-        val params = node.parameters
 
         if (formal.size == params.size) {
             for (i in 0..formal.lastIndex) {
@@ -50,19 +59,19 @@ fun SymbolTableVisitor.visitFunctionCall(node: FunctionCall): ObjectRecord {
                 val paramType = visitExpression(params[i])
 
                 if (formalType != paramType) {
-                    errors.println("Parameter ${i + 1}-th has type $paramType, expected $formalType")
+                    errors.println(node.lineNo, "Parameter ${i + 1}-th has type $paramType, expected $formalType")
                     return typeUniversal
                 }
             }
             function.returnType
         } else {
-            errors.println("Function parameter count does not match given parameter count")
+            errors.println(node.lineNo, "Function parameter count does not match given parameter count")
             typeUniversal
         }
     } else if (obj.kind == Kind.PROCEDURE) {
         typeUniversal
     } else {
-        errors.println("Function call on $name which is not a function")
+        errors.println(node.lineNo, "Function call on $name which is not a function")
         typeUniversal
     }
 }

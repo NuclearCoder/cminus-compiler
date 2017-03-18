@@ -15,7 +15,7 @@ fun Parser.expression(): Expression {
     while (symbol in EXPRESSION_SYMBOLS) {
         val sym = symbol
         expect(symbol)
-        node = BinaryOp(sym, node, term())
+        node = BinaryOp(lineNo, sym, node, term())
     }
     return node
 }
@@ -25,7 +25,7 @@ fun Parser.term(): Expression {
     while (symbol in TERM_SYMBOLS) {
         val sym = symbol
         expect(symbol)
-        node = BinaryOp(sym, node, factor())
+        node = BinaryOp(lineNo, sym, node, factor())
     }
     return node
 }
@@ -35,12 +35,12 @@ fun Parser.factor(): Expression {
         NUM_CONST -> {
             val value = argument
             expect(NUM_CONST)
-            return Atom.Integer(value)
+            return Atom.Integer(lineNo, value)
         }
         CHAR_CONST -> {
             val value = argument
             expect(CHAR_CONST)
-            return Atom.Char(value)
+            return Atom.Char(lineNo, value)
         }
         ID -> {
             val name = argument
@@ -48,7 +48,7 @@ fun Parser.factor(): Expression {
 
             // it might be a function call
             if (symbol == LEFT_PARENTHESIS) {
-                return functionCall(name)
+                return functionCall(name, isStatement = false) as Expression
             } else {
                 return variableAccess(name)
             }
@@ -56,7 +56,7 @@ fun Parser.factor(): Expression {
         in UNARY_SYMBOLS -> {
             val sym = symbol
             expect(symbol)
-            return UnaryOp(sym, expression())
+            return UnaryOp(lineNo, sym, expression())
         }
         LEFT_PARENTHESIS -> {
             expect(LEFT_PARENTHESIS)
@@ -66,7 +66,7 @@ fun Parser.factor(): Expression {
         }
         else -> {
             syntaxError()
-            return Atom.Unknown
+            return Atom.Unknown(lineNo)
         }
     }
 }

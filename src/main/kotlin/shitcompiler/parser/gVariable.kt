@@ -23,12 +23,12 @@ fun Parser.nameGroup(firstName: Int): List<Int> {
 }
 
 fun Parser.variableAccess(name: Int): VariableAccess {
-    var access = VariableAccess(name)
+    var access = VariableAccess(lineNo, name)
     while (symbol in SELECTOR_SYMBOLS) {
         if (symbol == LEFT_BRACKET) {
-            access = ArrayAccess(access, arraySelector())
+            access = ArrayAccess(lineNo, access, arraySelector())
         } else {
-            access = FieldAccess(access, fieldSelector())
+            access = FieldAccess(lineNo, access, fieldSelector())
         }
     }
 

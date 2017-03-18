@@ -4,6 +4,7 @@ import shitcompiler.NO_NAME
 import shitcompiler.UNNAMED
 import shitcompiler.ast.type.ArrayTypeReference
 import shitcompiler.ast.type.TypeReference
+import shitcompiler.println
 import shitcompiler.symboltable.classes.ArrayType
 import shitcompiler.symboltable.classes.Constant
 import shitcompiler.symboltable.classes.Nothing
@@ -30,26 +31,26 @@ class SymbolTable(private val errors: PrintWriter) {
     init {
         var i = 0
 
-        typeUniversal = define(i++, Kind.STANDARD_TYPE)
-        typeInt = define(i++, Kind.STANDARD_TYPE)
-        typeChar = define(i++, Kind.STANDARD_TYPE)
-        typeBool = define(i++, Kind.STANDARD_TYPE)
+        typeUniversal = define(0, i++, Kind.STANDARD_TYPE)
+        typeInt = define(0, i++, Kind.STANDARD_TYPE)
+        typeChar = define(0, i++, Kind.STANDARD_TYPE)
+        typeBool = define(0, i++, Kind.STANDARD_TYPE)
 
-        stdTrue = define(i++, Kind.CONSTANT, Constant(1, typeBool))
-        stdFalse = define(i, Kind.CONSTANT, Constant(0, typeBool))
+        stdTrue = define(0, i++, Kind.CONSTANT, Constant(1, typeBool))
+        stdFalse = define(0, i, Kind.CONSTANT, Constant(0, typeBool))
     }
 
-    fun findOrDefineType(type: TypeReference): ObjectRecord {
+    fun findOrDefineType(lineNo: Int, type: TypeReference): ObjectRecord {
         val elementType = if (type is ArrayTypeReference) {
-            findOrDefineType(type.elementType)
+            findOrDefineType(lineNo, type.elementType)
         } else {
-            find(type.name)
+            find(lineNo, type.name)
         }
 
         if (elementType.kind != Kind.STANDARD_TYPE
                 && elementType.kind != Kind.ARRAY_TYPE
                 && elementType.kind != Kind.STRUCT_TYPE) {
-            errors.println("Type reference was ${elementType.kind}, expected ${Kind.STANDARD_TYPE}, ${Kind.ARRAY_TYPE} or ${Kind.STRUCT_TYPE}")
+            errors.println(lineNo, "Type reference was ${elementType.kind}, expected ${Kind.STANDARD_TYPE}, ${Kind.ARRAY_TYPE} or ${Kind.STRUCT_TYPE}")
             return typeUniversal
         }
 
@@ -72,20 +73,20 @@ class SymbolTable(private val errors: PrintWriter) {
         }
     }
 
-    fun find(name: Int): ObjectRecord {
+    fun find(lineNo: Int, name: Int): ObjectRecord {
         for (level in currentLevel downTo 0) {
             val obj = blocks[level].find(name)
             if (obj != null) {
                 return obj
             }
         }
-        errors.println("Unknown reference $name")
-        return define(name, Kind.UNDEFINED)
+        errors.println(lineNo, "Unknown reference $name")
+        return define(lineNo, name, Kind.UNDEFINED)
     }
 
-    fun define(name: Int, kind: Kind, data: ObjectClass = Nothing): ObjectRecord {
+    fun define(lineNo: Int, name: Int, kind: Kind, data: ObjectClass = Nothing): ObjectRecord {
         if (name != NO_NAME && name != UNNAMED && blocks[currentLevel].find(name) != null) {
-            errors.println("Defined $name more than once")
+            errors.println(lineNo, "Defined $name more than once")
         }
         return blocks[currentLevel].define(name, kind, data)
     }

@@ -7,7 +7,7 @@ import shitcompiler.ast.statement.Statement
  * Created by NuclearCoder on 17/03/17.
  */
 
-class FunctionCall(val name: Int, val parameters: List<Expression>) : Expression, Statement {
+class FunctionCallStatement(lineNo: Int, val name: Int, val parameters: List<Expression>) : Statement(lineNo) {
 
     override fun toString() = "FunctionCall id($name) $parameters"
 

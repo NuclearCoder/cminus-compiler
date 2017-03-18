@@ -5,17 +5,17 @@ package shitcompiler.ast.expression
  * Created by NuclearCoder on 02/03/17.
  */
 
-sealed class Atom(val value: Int) : Expression {
+sealed class Atom(lineNo: Int, val value: Int) : Expression(lineNo) {
 
-    class Integer(value: Int) : Atom(value) {
+    class Integer(lineNo: Int, value: Int) : Atom(lineNo, value) {
         override fun toString() = "int($value)"
     }
 
-    class Char(value: Int) : Atom(value) {
+    class Char(lineNo: Int, value: Int) : Atom(lineNo, value) {
         override fun toString() = "char($value)"
     }
 
-    object Unknown : Atom(0) {
+    class Unknown(lineNo: Int) : Atom(lineNo, 0) {
         override fun toString() = "Unknown"
     }
 

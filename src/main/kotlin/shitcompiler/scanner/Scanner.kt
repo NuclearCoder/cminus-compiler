@@ -2,6 +2,7 @@ package shitcompiler.scanner
 
 import shitcompiler.ETX
 import shitcompiler.SEPARATORS
+import shitcompiler.println
 import shitcompiler.token.Symbol
 import shitcompiler.token.Symbol.*
 import java.io.PrintWriter
@@ -16,6 +17,7 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
 
     private val symbols = LinkedList<Int>()
 
+    private var lineNo: Int = 1
     private var position: Int = -1
     private var currentChar by notNull<Char>()
 
@@ -51,9 +53,10 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
 
     private fun skipSeparators() {
         while (currentChar != ETX && currentChar in SEPARATORS) {
-            if (currentChar == '\n')
-            // this is for the parser to print line number when we add error recovery
+            if (currentChar == '\n') {
                 emit(NEWLINE)
+                lineNo++
+            }
             nextChar()
         }
     }
@@ -120,7 +123,7 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
                 value = 10 * value + digit
                 nextChar()
             } else {
-                errors.println("An int constant is outside the range 0..${Int.MAX_VALUE}")
+                errors.println(lineNo, "An int constant is outside the range 0..${Int.MAX_VALUE}")
                 // error recovery:
                 emit(NUM_CONST)
                 emit(0)
@@ -146,7 +149,7 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
         }
         nextChar()
         if (currentChar != '\'') {
-            errors.println("A char constant is missing a closing quote")
+            errors.println(lineNo, "A char constant is missing a closing quote")
             // error recovery:
             emit(CHAR_CONST)
             emit(0)

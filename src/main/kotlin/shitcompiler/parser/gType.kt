@@ -42,7 +42,7 @@ fun Parser.typeName(): Int {
 
 fun Parser.typeReference(): TypeReference {
     /* a type is either a type or an array type*/
-    var reference = TypeReference(typeName())
+    var reference = TypeReference(lineNo, typeName())
 
     while (symbol == LEFT_BRACKET) {
         expect(LEFT_BRACKET)
@@ -50,7 +50,7 @@ fun Parser.typeReference(): TypeReference {
         expect(NUM_CONST)
         expect(RIGHT_BRACKET)
 
-        reference = ArrayTypeReference(reference, length)
+        reference = ArrayTypeReference(lineNo, reference, length)
     }
 
     return reference
@@ -69,5 +69,5 @@ fun Parser.structTypeDefinition(): StructDefinition {
     expect(ID)
     expect(SEMICOLON)
 
-    return StructDefinition(name, fields)
+    return StructDefinition(lineNo, name, fields)
 }

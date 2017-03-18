@@ -1,11 +1,12 @@
 package shitcompiler.parser
 
 import shitcompiler.LONG_SYMBOLS
-import shitcompiler.ast.AST
+import shitcompiler.ast.Program
+import shitcompiler.println
+import shitcompiler.removeSymbol
 import shitcompiler.token.Symbol
 import shitcompiler.token.Symbol.END_TEXT
 import shitcompiler.token.Symbol.NEWLINE
-import shitcompiler.token.removeSymbol
 import java.io.PrintWriter
 import java.util.*
 
@@ -18,9 +19,10 @@ class Parser(private val symbols: Queue<Int>, internal val errors: PrintWriter) 
     internal var symbol = Symbol.UNKNOWN
     internal var argument: Int = 0
 
-    private var lineNo = 1
+    internal var lineNo = 1
+        private set
 
-    fun execute(): AST {
+    fun execute(): Program {
         nextSymbol()
 
         val root = program()
@@ -43,7 +45,7 @@ class Parser(private val symbols: Queue<Int>, internal val errors: PrintWriter) 
     }
 
     internal fun syntaxError() {
-        errors.println("Invalid syntax on symbol $symbol, line #$lineNo")
+        errors.println(lineNo, "Unexpected $symbol")
     }
 
     internal fun expect(expected: Symbol) {

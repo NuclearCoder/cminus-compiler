@@ -1,8 +1,5 @@
 package shitcompiler.token
 
-import shitcompiler.LONG_SYMBOLS
-import java.util.*
-
 /**
  * Created by NuclearCoder on 14/01/2017.
  */
@@ -72,25 +69,4 @@ enum class Symbol(private val s: String) {
     UNKNOWN("[UNKNOWN]");
 
     override fun toString() = s
-}
-
-fun Int.toSymbol() = Symbol.values()[this]
-fun Queue<Int>.removeSymbol() = remove().toSymbol()
-
-fun Queue<Int>.toPrettyString(): String {
-    val it = this.iterator()
-    val sb = StringBuilder()
-    while (it.hasNext()) {
-        val symbol = it.next().toSymbol()
-        sb.append(symbol.toString())
-        if (symbol in LONG_SYMBOLS) {
-            sb.append('(')
-            sb.append(it.next())
-            sb.append(')')
-        }
-        if (symbol != Symbol.END_TEXT) {
-            sb.append(' ')
-        }
-    }
-    return sb.toString()
 }

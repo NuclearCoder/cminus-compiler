@@ -2,6 +2,7 @@ package shitcompiler.visitor.symboltable
 
 import shitcompiler.ast.type.FieldAccess
 import shitcompiler.ast.type.StructDefinition
+import shitcompiler.println
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.classes.Field
@@ -18,12 +19,12 @@ fun SymbolTableVisitor.visitStructDefinition(node: StructDefinition) {
         val names = declaration.names
         val type = declaration.type
 
-        val typeObj = table.findOrDefineType(type)
+        val typeObj = table.findOrDefineType(node.lineNo, type)
 
         names.forEach { fields.add(ObjectRecord(it, Kind.FIELD, Field(typeObj), 0)) }
     }
 
-    table.define(node.name, Kind.STRUCT_TYPE, StructType(fields))
+    table.define(node.lineNo, node.name, Kind.STRUCT_TYPE, StructType(fields))
 }
 
 fun SymbolTableVisitor.visitFieldAccess(node: FieldAccess): ObjectRecord {
@@ -36,11 +37,11 @@ fun SymbolTableVisitor.visitFieldAccess(node: FieldAccess): ObjectRecord {
         if (obj != null) {
             obj.asField().type
         } else {
-            errors.println("Undeclared field $field")
+            errors.println(node.lineNo, "Undeclared field $field")
             typeUniversal
         }
     } else {
-        errors.println("Field selector must act on a struct")
+        errors.println(node.lineNo, "Field selector must act on a struct")
         typeUniversal
     }
 }

@@ -1,11 +1,12 @@
 package shitcompiler.parser
 
 import shitcompiler.ast.Program
-import shitcompiler.ast.function.FunctionCall
+import shitcompiler.ast.function.FunctionCallStatement
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
 import shitcompiler.ast.statement.EmptyStatement
 import shitcompiler.ast.statement.Statement
+import shitcompiler.println
 
 /**
  * Created by NuclearCoder on 26/01/17.
@@ -22,13 +23,13 @@ fun Parser.program(): Program {
                 return@filter
             if (it is BlockStatement
                     || it is Assignment
-                    || it is FunctionCall) {
-                errors.println("Illegal statement type at the program level ${it::class.simpleName}")
+                    || it is FunctionCallStatement) {
+                errors.println(lineNo, "Illegal statement type at the program level ${it::class.simpleName}")
                 return@filter
             }
             statements.add(it)
         }
     }
 
-    return Program(statements)
+    return Program(lineNo, statements)
 }

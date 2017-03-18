@@ -6,4 +6,4 @@ import shitcompiler.ast.AST
  * Created by NuclearCoder on 08/03/17.
  */
 
-interface Expression : AST
+abstract class Expression(lineNo: Int) : AST(lineNo)

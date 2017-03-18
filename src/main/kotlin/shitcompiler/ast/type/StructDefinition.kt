@@ -7,7 +7,7 @@ import shitcompiler.ast.statement.Statement
  * Created by NuclearCoder on 16/03/17.
  */
 
-class StructDefinition(val name: Int, val fields: List<Declaration>) : Statement {
+class StructDefinition(lineNo: Int, val name: Int, val fields: List<Declaration>) : Statement(lineNo) {
 
     override fun toString() = "Struct id($name) $fields"
 

@@ -2,7 +2,6 @@ package shitcompiler
 
 import shitcompiler.parser.Parser
 import shitcompiler.scanner.Scanner
-import shitcompiler.token.toPrettyString
 import shitcompiler.visitor.symboltable.SymbolTableVisitor
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -32,16 +31,4 @@ fun main(args: Array<String>) {
 
         println(errors.toString())
     }
-}
-
-fun readMultiLine(): String {
-    val sb = StringBuilder()
-    do {
-        val line = readLine()
-        if (line != null && line.isNotEmpty()) {
-            sb.append(line)
-            sb.append('\n')
-        }
-    } while (line != null && line.isNotEmpty())
-    return sb.toString()
 }

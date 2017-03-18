@@ -1,7 +1,8 @@
 package shitcompiler.visitor.symboltable
 
 import shitcompiler.ast.expression.*
-import shitcompiler.ast.function.FunctionCall
+import shitcompiler.ast.function.FunctionCallExpression
+import shitcompiler.println
 import shitcompiler.symboltable.ObjectRecord
 
 /**
@@ -13,11 +14,11 @@ fun SymbolTableVisitor.visitExpression(node: Expression): ObjectRecord {
         is BinaryOp -> visitBinaryOp(node)
         is UnaryOp -> visitUnaryOp(node)
         is VariableAccess -> visitVariableAccess(node)
-        is FunctionCall -> visitFunctionCall(node)
+        is FunctionCallExpression -> visitFunctionCallExpression(node)
         is Atom.Integer -> visitInteger(node)
         is Atom.Char -> visitCharacter(node)
         else -> {
-            errors.println("Unexpected expression ${node::class.simpleName}")
+            errors.println(node.lineNo, "Unhandled expression node ${node::class.simpleName}")
             typeUniversal
         }
     }

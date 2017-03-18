@@ -1,10 +1,8 @@
 package shitcompiler.parser
 
+import shitcompiler.ast.AST
 import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.function.FunctionCall
-import shitcompiler.ast.function.FunctionDefinition
-import shitcompiler.ast.function.FunctionParameter
-import shitcompiler.ast.function.ProcedureDefinition
+import shitcompiler.ast.function.*
 import shitcompiler.ast.statement.Statement
 import shitcompiler.ast.type.TypeReference
 import shitcompiler.token.Symbol.*
@@ -13,7 +11,7 @@ import shitcompiler.token.Symbol.*
  * Created by NuclearCoder on 17/03/17.
  */
 
-fun Parser.functionCall(name: Int): FunctionCall {
+fun Parser.functionCall(name: Int, isStatement: Boolean): AST {
     expect(LEFT_PARENTHESIS)
 
     val parameters = mutableListOf<Expression>()
@@ -28,7 +26,10 @@ fun Parser.functionCall(name: Int): FunctionCall {
 
     expect(RIGHT_PARENTHESIS)
 
-    return FunctionCall(name, parameters)
+    return if (isStatement)
+        FunctionCallStatement(lineNo, name, parameters)
+    else
+        FunctionCallExpression(lineNo, name, parameters)
 }
 
 fun Parser.functionDefinition(name: Int, returnType: TypeReference?): Statement {
@@ -52,9 +53,9 @@ fun Parser.functionDefinition(name: Int, returnType: TypeReference?): Statement 
 
     // procedure / function
     return if (returnType != null)
-        FunctionDefinition(name, returnType, parameters, block)
+        FunctionDefinition(lineNo, name, returnType, parameters, block)
     else
-        ProcedureDefinition(name, parameters, block)
+        ProcedureDefinition(lineNo, name, parameters, block)
 }
 
 fun Parser.functionParameter(): FunctionParameter {
