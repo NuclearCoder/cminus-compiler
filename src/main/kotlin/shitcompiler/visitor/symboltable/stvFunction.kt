@@ -2,7 +2,10 @@ package shitcompiler.visitor.symboltable
 
 import shitcompiler.ast.AST
 import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.function.*
+import shitcompiler.ast.function.FunctionCallExpression
+import shitcompiler.ast.function.FunctionCallStatement
+import shitcompiler.ast.function.FunctionDefinition
+import shitcompiler.ast.function.FunctionOrProcedureDefinition
 import shitcompiler.println
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
@@ -48,11 +51,16 @@ fun SymbolTableVisitor.visitFunctionCallExpression(node: FunctionCallExpression)
 
 private fun SymbolTableVisitor.functionCall(node: AST, name: Int, params: List<Expression>): ObjectRecord {
     val obj = table.find(node.lineNo, name)
-    return if (obj.kind == Kind.FUNCTION) {
-        val function = obj.asFunction()
-        // check one-to-one equality between call parameters and function parameters
-        val formal = function.parameters
+    return if (obj.kind == Kind.FUNCTION || obj.kind == Kind.PROCEDURE) {
+        val formal: List<ObjectRecord>
 
+        if (obj.kind == Kind.FUNCTION) {
+            formal = obj.asFunction().parameters
+        } else {
+            formal = obj.asProcedure().parameters
+        }
+
+        // check one-to-one equality between call parameters and function parameters
         if (formal.size == params.size) {
             for (i in 0..formal.lastIndex) {
                 val formalType = formal[i].asParameter().type
@@ -63,13 +71,16 @@ private fun SymbolTableVisitor.functionCall(node: AST, name: Int, params: List<E
                     return typeUniversal
                 }
             }
-            function.returnType
+
+            if (obj.kind == Kind.FUNCTION) {
+                obj.asFunction().returnType
+            } else {
+                typeUniversal
+            }
         } else {
             errors.println(node.lineNo, "Function parameter count does not match given parameter count")
             typeUniversal
         }
-    } else if (obj.kind == Kind.PROCEDURE) {
-        typeUniversal
     } else {
         errors.println(node.lineNo, "Function call on $name which is not a function")
         typeUniversal
