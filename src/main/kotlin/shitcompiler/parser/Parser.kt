@@ -13,7 +13,7 @@ import java.util.*
  * Created by NuclearCoder on 14/01/2017.
  */
 
-class Parser(private val symbols: Queue<Int>, val errors: PrintWriter) {
+class Parser(private val symbols: Queue<Int>, internal val errors: PrintWriter) {
 
     internal var symbol = Symbol.UNKNOWN
     internal var argument: Int = 0

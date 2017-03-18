@@ -3,7 +3,7 @@ package shitcompiler
 import shitcompiler.parser.Parser
 import shitcompiler.scanner.Scanner
 import shitcompiler.token.toPrettyString
-import shitcompiler.visitor.SymbolTableVisitor
+import shitcompiler.visitor.symboltable.SymbolTableVisitor
 import java.io.PrintWriter
 import java.io.StringWriter
 
