@@ -20,6 +20,7 @@ class SymbolTable(private val errors: PrintWriter) {
     val typeInt: ObjectRecord
     val typeChar: ObjectRecord
     val typeBool: ObjectRecord
+    val typeVoid: ObjectRecord
     val stdTrue: ObjectRecord
     val stdFalse: ObjectRecord
 
@@ -35,14 +36,17 @@ class SymbolTable(private val errors: PrintWriter) {
         typeInt = define(0, i++, Kind.STANDARD_TYPE)
         typeChar = define(0, i++, Kind.STANDARD_TYPE)
         typeBool = define(0, i++, Kind.STANDARD_TYPE)
+        typeVoid = define(0, i++, Kind.STANDARD_TYPE)
 
         stdTrue = define(0, i++, Kind.CONSTANT, Constant(1, typeBool))
         stdFalse = define(0, i, Kind.CONSTANT, Constant(0, typeBool))
     }
 
-    fun findOrDefineType(lineNo: Int, type: TypeReference): ObjectRecord {
+    fun findOrDefineType(type: TypeReference): ObjectRecord {
+        val lineNo = type.lineNo
+
         val elementType = if (type is ArrayTypeReference) {
-            findOrDefineType(lineNo, type.elementType)
+            findOrDefineType(type.elementType)
         } else {
             find(lineNo, type.name)
         }
@@ -55,6 +59,12 @@ class SymbolTable(private val errors: PrintWriter) {
         }
 
         if (type is ArrayTypeReference) {
+            if (elementType == typeVoid) {
+                // void arrays aren't allowed
+                errors.println(lineNo, "Void array type references aren't allowed")
+                return typeVoid
+            }
+
             val elementTypeBlock = blocks[elementType.blockLevel]
             val length = type.length
 

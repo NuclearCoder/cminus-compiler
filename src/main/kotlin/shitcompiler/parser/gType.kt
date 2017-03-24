@@ -1,9 +1,6 @@
 package shitcompiler.parser
 
-import shitcompiler.NAME_BOOL
-import shitcompiler.NAME_CHAR
-import shitcompiler.NAME_INT
-import shitcompiler.NO_NAME
+import shitcompiler.*
 import shitcompiler.ast.statement.Declaration
 import shitcompiler.ast.type.ArrayTypeReference
 import shitcompiler.ast.type.StructDefinition
@@ -27,6 +24,10 @@ fun Parser.typeName(): Int {
         BOOL -> {
             expect(BOOL)
             NAME_BOOL
+        }
+        VOID -> {
+            expect(VOID)
+            NAME_VOID
         }
         ID -> {
             val arg = argument

@@ -194,6 +194,7 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
         nextChar()
         when (currentChar) {
             '/' -> skipLine()
+            '*' -> skipLongComment()
             '=' -> nextEmit(BECOMES_DIV)
             else -> emit(DIV)
         }
@@ -225,6 +226,27 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
     private fun scanPipe() {
         nextChar()
         if (currentChar == '|') nextEmit(OR)
+    }
+
+    private fun skipLongComment() {
+        // support nested comments
+        var level = 1
+        lgcom@ while (ETX != currentChar && level > 0) {
+            val chr = currentChar
+            nextChar()
+            when (chr) {
+                '/' -> {
+                    if (currentChar == '*')
+                        level++
+                    else continue@lgcom
+                }
+                '*' -> {
+                    if (currentChar == '/')
+                        level--
+                    else continue@lgcom
+                }
+            }
+        }
     }
 
 }

@@ -56,7 +56,7 @@ fun Parser.factor(): Expression {
         in UNARY_SYMBOLS -> {
             val sym = symbol
             expect(symbol)
-            return UnaryOp(lineNo, sym, expression())
+            return UnaryOp(lineNo, sym, factor())
         }
         LEFT_PARENTHESIS -> {
             expect(LEFT_PARENTHESIS)

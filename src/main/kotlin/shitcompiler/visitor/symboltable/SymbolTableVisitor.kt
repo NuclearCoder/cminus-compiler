@@ -16,6 +16,7 @@ class SymbolTableVisitor(internal val errors: PrintWriter) {
     internal val typeInt = table.typeInt
     internal val typeChar = table.typeChar
     internal val typeBool = table.typeBool
+    internal val typeVoid = table.typeVoid
 
     fun visit(node: Program) {
         table.beginBlock()

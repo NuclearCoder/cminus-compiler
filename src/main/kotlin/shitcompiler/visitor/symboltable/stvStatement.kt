@@ -2,7 +2,6 @@ package shitcompiler.visitor.symboltable
 
 import shitcompiler.ast.function.FunctionCallStatement
 import shitcompiler.ast.function.FunctionDefinition
-import shitcompiler.ast.function.ProcedureDefinition
 import shitcompiler.ast.statement.*
 import shitcompiler.ast.type.StructDefinition
 import shitcompiler.println
@@ -20,9 +19,9 @@ fun SymbolTableVisitor.visitStatement(node: Statement) {
         is Assignment -> visitAssignment(node)
         is StructDefinition -> visitStructDefinition(node)
         is FunctionDefinition -> visitFunctionDefinition(node)
-        is ProcedureDefinition -> visitFunctionDefinition(node)
         is FunctionCallStatement -> visitFunctionCallStatement(node)
-        is EmptyStatement -> Unit
+        is EmptyStatement -> {
+        }
         else -> {
             errors.println(node.lineNo, "Unhandled statement node ${node::class.simpleName}")
         }
@@ -44,7 +43,10 @@ fun SymbolTableVisitor.visitDeclaration(node: Declaration) {
     val names = node.names
     val type = node.type
 
-    val typeObj = table.findOrDefineType(node.lineNo, type)
+    val typeObj = table.findOrDefineType(type)
+    if (typeObj == typeVoid) {
+        errors.println(node.lineNo, "Void variables can not be declared")
+    }
 
     names.forEach { table.define(node.lineNo, it, Kind.VARIABLE, VarParam(typeObj)) }
 }
@@ -53,6 +55,9 @@ fun SymbolTableVisitor.visitAssignment(node: Assignment) {
     val accessType = visitVariableAccess(node.access)
     val exprType = visitExpression(node.value)
 
+    if (exprType == typeVoid) {
+        errors.println(node.lineNo, "Void expressions aren't assignable")
+    }
     if (accessType != exprType) {
         errors.println(node.lineNo, "Trying to assign $exprType to $accessType")
     }

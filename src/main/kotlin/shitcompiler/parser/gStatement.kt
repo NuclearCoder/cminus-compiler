@@ -22,9 +22,8 @@ fun Parser.statement(): Statement {
     return when (symbol) {
         BEGIN -> blockStatement()
         STRUCT -> structStatement()
-        INT, CHAR, BOOL -> declarationOrFunctionStatement()
+        INT, CHAR, BOOL, VOID -> declarationOrFunctionStatement()
         ID -> assignmentOrFunctionStatement()
-        VOID -> procedureStatement()
         SEMICOLON -> emptyStatement()
         else -> {
             syntaxError()
@@ -51,13 +50,6 @@ fun Parser.declarationOrFunctionStatement(): Statement {
     } else {
         return declarationStatement(name, type)
     }
-}
-
-fun Parser.procedureStatement(): Statement {
-    expect(VOID)
-    val name = argument
-    expect(ID)
-    return functionDefinition(name, returnType = null)
 }
 
 fun Parser.declarationStatement(): Declaration {

@@ -14,7 +14,6 @@ enum class Kind {
     STRUCT_TYPE,
 
     FUNCTION,
-    PROCEDURE,
 
     FIELD,
     VARIABLE,
