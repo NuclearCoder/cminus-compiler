@@ -16,8 +16,10 @@ val KEYWORDS = mapOf(
         "if" to IF,
         "int" to INT,
         "else" to ELSE,
+        "false" to FALSE,
         "return" to RETURN,
         "struct" to STRUCT,
+        "true" to TRUE,
         "void" to VOID,
         "while" to WHILE
 )

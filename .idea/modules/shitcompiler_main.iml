@@ -18,7 +18,7 @@
                 <option name="noStdlib" value="true" />
                 <option name="noReflect" value="true" />
                 <option name="moduleName" value="shitcompiler_main" />
-                <option name="jvmTarget" value="1.8" />
+                <option name="jvmTarget" value="1.6" />
                 <option name="addCompilerBuiltIns" value="true" />
                 <option name="loadBuiltInsFromDependencies" value="true" />
                 <option name="languageVersion" value="1.1" />
@@ -46,7 +46,7 @@
           <KotlinVersionInfo>
             <option name="apiLevel" value="1.1" />
             <option name="languageLevel" value="1.1" />
-            <option name="targetPlatformName" value="JVM 1.8" />
+            <option name="targetPlatformName" value="JVM 1.6" />
           </KotlinVersionInfo>
         </option>
       </configuration>
@@ -59,6 +59,8 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/kotlin" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/../../src/main/kotlin/shitcompiler/ptparser" />
+      <excludeFolder url="file://$MODULE_DIR$/../../src/main/kotlin/shitcompiler/visitor/codegen" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

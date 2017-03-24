@@ -1,9 +1,8 @@
 package shitcompiler.parser
 
-import shitcompiler.ast.expression.Atom
-import shitcompiler.ast.expression.BinaryOp
-import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.expression.UnaryOp
+import shitcompiler.NAME_FALSE
+import shitcompiler.NAME_TRUE
+import shitcompiler.ast.expression.*
 import shitcompiler.token.Symbol.*
 
 /**
@@ -41,6 +40,14 @@ fun Parser.factor(): Expression {
             val value = argument
             expect(CHAR_CONST)
             return Atom.Char(lineNo, value)
+        }
+        TRUE -> {
+            expect(TRUE)
+            return VariableAccess(lineNo, NAME_TRUE)
+        }
+        FALSE -> {
+            expect(FALSE)
+            return VariableAccess(lineNo, NAME_FALSE)
         }
         ID -> {
             val name = argument
