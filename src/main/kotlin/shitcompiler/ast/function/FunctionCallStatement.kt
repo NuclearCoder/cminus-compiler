@@ -9,6 +9,6 @@ import shitcompiler.ast.statement.Statement
 
 class FunctionCallStatement(lineNo: Int, val name: Int, val parameters: List<Expression>) : Statement(lineNo) {
 
-    override fun toString() = "FunctionCall id($name) $parameters"
+    override fun toString() = "FunctionCall id(<($name)>) $parameters"
 
 }

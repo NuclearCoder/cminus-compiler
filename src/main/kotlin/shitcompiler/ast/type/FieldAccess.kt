@@ -8,6 +8,6 @@ import shitcompiler.ast.expression.VariableAccess
 
 class FieldAccess(lineNo: Int, val access: VariableAccess, val field: Int) : VariableAccess(lineNo, 0) {
 
-    override fun toString() = "$access.$field"
+    override fun toString() = "$access.<($field)>"
 
 }

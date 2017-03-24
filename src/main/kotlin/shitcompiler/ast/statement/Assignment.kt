@@ -10,6 +10,6 @@ import shitcompiler.token.Symbol
 
 class Assignment(lineNo: Int, val sym: Symbol, val access: VariableAccess, val value: Expression) : Statement(lineNo) {
 
-    override fun toString() = "Assignment $access $sym $value"
+    override fun toString() = "Assign $access $sym $value"
 
 }

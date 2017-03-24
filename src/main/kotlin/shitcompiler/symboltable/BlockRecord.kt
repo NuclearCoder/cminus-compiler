@@ -6,17 +6,7 @@ package shitcompiler.symboltable
 
 internal class BlockRecord(val level: Int) {
 
-    private val records = mutableListOf<ObjectRecord>()
-
-    fun clear() = records.clear()
-    fun firstOrNull(predicate: (ObjectRecord) -> Boolean)
-            = records.firstOrNull(predicate)
-
-    fun filter(predicate: (ObjectRecord) -> Boolean)
-            = records.filter(predicate)
-
-    fun removeIf(predicate: (ObjectRecord) -> Boolean)
-            = records.removeIf(predicate)
+    internal val records = mutableListOf<ObjectRecord>()
 
     fun find(name: Int): ObjectRecord? {
         return records.firstOrNull { it.name == name }

@@ -8,6 +8,6 @@ import shitcompiler.ast.type.TypeReference
 
 class FunctionParameter(val type: TypeReference, val name: Int) {
 
-    override fun toString() = "type($type) id($name)"
+    override fun toString() = "$type <($name)>"
 
 }

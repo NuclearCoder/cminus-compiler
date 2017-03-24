@@ -6,6 +6,8 @@ import shitcompiler.token.Symbol.*
  * Created by NuclearCoder on 10/03/17.
  */
 
+val PRINT_TAB = "  "
+
 val ETX = 0x03.toChar()
 
 val SEPARATORS = setOf(' ', '\t', '\n') + ('\u0000'..'\u001F')

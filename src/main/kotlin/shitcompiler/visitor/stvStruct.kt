@@ -1,8 +1,7 @@
-package shitcompiler.visitor.symboltable
+package shitcompiler.visitor
 
 import shitcompiler.ast.type.FieldAccess
 import shitcompiler.ast.type.StructDefinition
-import shitcompiler.println
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.classes.Field
@@ -37,11 +36,11 @@ fun SymbolTableVisitor.visitFieldAccess(node: FieldAccess): ObjectRecord {
         if (obj != null) {
             obj.asField().type
         } else {
-            errors.println(node.lineNo, "Undeclared field $field")
+            error(node.lineNo, "Undeclared field '<($field)>'")
             typeUniversal
         }
     } else {
-        errors.println(node.lineNo, "Field selector must act on a struct")
+        error(node.lineNo, "Field selector must act on a struct")
         typeUniversal
     }
 }

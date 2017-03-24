@@ -13,7 +13,7 @@ import kotlin.properties.Delegates.notNull
  * Created by NuclearCoder on 14/01/2017.
  */
 
-class Scanner(private val input: String, private val errors: PrintWriter) {
+class Scanner(private val input: String, private val names: MutableMap<Int, String>, private val errors: PrintWriter) {
 
     private val symbols = LinkedList<Int>()
 
@@ -21,7 +21,7 @@ class Scanner(private val input: String, private val errors: PrintWriter) {
     private var position: Int = -1
     private var currentChar by notNull<Char>()
 
-    private val nameTable = WordTable()
+    private val nameTable = WordTable(names)
 
     fun execute(): Queue<Int> {
         nextChar()

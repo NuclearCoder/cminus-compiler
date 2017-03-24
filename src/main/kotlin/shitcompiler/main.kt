@@ -2,7 +2,7 @@ package shitcompiler
 
 import shitcompiler.parser.Parser
 import shitcompiler.scanner.Scanner
-import shitcompiler.visitor.symboltable.SymbolTableVisitor
+import shitcompiler.visitor.SymbolTableVisitor
 import java.io.PrintWriter
 import java.io.StringWriter
 
@@ -20,13 +20,15 @@ fun main(args: Array<String>) {
         val errors = StringWriter()
         val ps = PrintWriter(errors)
 
-        val tokens = run { Scanner(input, ps).execute() }
-        println("Tokens:\n  ${tokens.toPrettyString()}")
+        val names = mutableMapOf<Int, String>()
 
-        val root = run { Parser(tokens, ps).execute() }
-        println("\nAST:\n  $root\n")
+        val tokens = Scanner(input, names, ps).execute()
+        println("  Tokens:\n${format(names, tokens.toPrettyString())}")
 
-        val symTableVisitor = SymbolTableVisitor(ps)
+        val root = Parser(tokens, ps).execute()
+        println("\n  AST:\n${format(names, root.toString())}\n")
+
+        val symTableVisitor = SymbolTableVisitor(names, ps)
         symTableVisitor.visit(root)
 
         println(errors.toString())

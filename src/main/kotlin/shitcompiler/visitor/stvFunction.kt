@@ -1,11 +1,10 @@
-package shitcompiler.visitor.symboltable
+package shitcompiler.visitor
 
 import shitcompiler.ast.AST
 import shitcompiler.ast.expression.Expression
 import shitcompiler.ast.function.FunctionCallExpression
 import shitcompiler.ast.function.FunctionCallStatement
 import shitcompiler.ast.function.FunctionDefinition
-import shitcompiler.println
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.classes.FunctionR
@@ -55,18 +54,18 @@ private fun SymbolTableVisitor.functionCall(node: AST, name: Int, params: List<E
                 val paramType = visitExpression(params[i])
 
                 if (formalType != paramType) {
-                    errors.println(node.lineNo, "Parameter ${i + 1}-th has type $paramType, expected $formalType")
+                    error(node.lineNo, "Parameter ${i + 1}-th has type $paramType, expected $formalType")
                     return typeUniversal
                 }
             }
 
             obj.asFunction().returnType
         } else {
-            errors.println(node.lineNo, "Function parameter count does not match given parameter count")
+            error(node.lineNo, "Function parameter count does not match given parameter count")
             typeUniversal
         }
     } else {
-        errors.println(node.lineNo, "Function call on $name which is not a function")
+        error(node.lineNo, "Function call on '<($name)>' which is not a function")
         typeUniversal
     }
 }

@@ -1,7 +1,6 @@
-package shitcompiler.visitor.symboltable
+package shitcompiler.visitor
 
 import shitcompiler.ast.expression.BinaryOp
-import shitcompiler.println
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.token.Symbol
 
@@ -14,7 +13,7 @@ fun SymbolTableVisitor.visitBinaryOp(node: BinaryOp): ObjectRecord {
             if (typeLeft == typeInt && typeLeft == typeRight) {
                 typeInt
             } else {
-                errors.println(node.lineNo, "Expected integer expressions")
+                error(node.lineNo, "Expected integer expressions")
                 typeUniversal
             }
         }
@@ -22,7 +21,7 @@ fun SymbolTableVisitor.visitBinaryOp(node: BinaryOp): ObjectRecord {
             if (typeLeft == typeBool && typeLeft == typeRight) {
                 typeBool
             } else {
-                errors.println(node.lineNo, "Expected boolean expressions")
+                error(node.lineNo, "Expected boolean expressions")
                 typeUniversal
             }
         }
@@ -30,7 +29,7 @@ fun SymbolTableVisitor.visitBinaryOp(node: BinaryOp): ObjectRecord {
             if (typeLeft == typeRight) {
                 typeBool
             } else {
-                errors.println(node.lineNo, "Expected same-type expressions")
+                error(node.lineNo, "Expected same-type expressions")
                 typeUniversal
             }
         }
@@ -38,12 +37,12 @@ fun SymbolTableVisitor.visitBinaryOp(node: BinaryOp): ObjectRecord {
             if (typeLeft == typeInt && typeLeft == typeRight) {
                 typeBool
             } else {
-                errors.println(node.lineNo, "Expected integer expressions")
+                error(node.lineNo, "Expected integer expressions")
                 typeUniversal
             }
         }
         else -> {
-            errors.println(node.lineNo, "Unexpected operator ${node.sym}")
+            error(node.lineNo, "Unexpected operator ${node.sym}")
             typeUniversal
         }
     }

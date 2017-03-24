@@ -1,4 +1,4 @@
-package shitcompiler.visitor.symboltable
+package shitcompiler.visitor
 
 import shitcompiler.ast.expression.Atom
 import shitcompiler.symboltable.ObjectRecord

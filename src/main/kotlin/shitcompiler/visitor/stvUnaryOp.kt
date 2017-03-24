@@ -1,7 +1,6 @@
-package shitcompiler.visitor.symboltable
+package shitcompiler.visitor
 
 import shitcompiler.ast.expression.UnaryOp
-import shitcompiler.println
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.token.Symbol
 
@@ -12,7 +11,7 @@ fun SymbolTableVisitor.visitUnaryOp(node: UnaryOp): ObjectRecord {
             if (type == typeInt) {
                 typeInt
             } else {
-                errors.println(node.lineNo, "Expected integer expression")
+                error(node.lineNo, "Expected integer expression")
                 typeUniversal
             }
         }
@@ -20,12 +19,12 @@ fun SymbolTableVisitor.visitUnaryOp(node: UnaryOp): ObjectRecord {
             if (type == typeBool) {
                 typeBool
             } else {
-                errors.println(node.lineNo, "Expected boolean expression")
+                error(node.lineNo, "Expected boolean expression")
                 typeUniversal
             }
         }
         else -> {
-            errors.println(node.lineNo, "Unexpected operator ${node.sym}")
+            error(node.lineNo, "Unexpected operator ${node.sym}")
             typeUniversal
         }
     }

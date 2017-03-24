@@ -4,17 +4,16 @@ import shitcompiler.NO_NAME
 import shitcompiler.UNNAMED
 import shitcompiler.ast.type.ArrayTypeReference
 import shitcompiler.ast.type.TypeReference
-import shitcompiler.println
 import shitcompiler.symboltable.classes.ArrayType
 import shitcompiler.symboltable.classes.Constant
 import shitcompiler.symboltable.classes.Nothing
-import java.io.PrintWriter
+import shitcompiler.visitor.SymbolTableVisitor
 
 /**
  * Created by NuclearCoder on 06/03/17.
  */
 
-class SymbolTable(private val errors: PrintWriter) {
+class SymbolTable(private val visitor: SymbolTableVisitor) {
 
     val typeUniversal: ObjectRecord
     val typeInt: ObjectRecord
@@ -27,7 +26,8 @@ class SymbolTable(private val errors: PrintWriter) {
     private val blocks = arrayListOf(BlockRecord(0))
 
     // the 0-th level is the standard level
-    private var currentLevel: Int = 0
+    internal var currentLevel: Int = 0
+        private set
 
     init {
         var i = 0
@@ -54,14 +54,14 @@ class SymbolTable(private val errors: PrintWriter) {
         if (elementType.kind != Kind.STANDARD_TYPE
                 && elementType.kind != Kind.ARRAY_TYPE
                 && elementType.kind != Kind.STRUCT_TYPE) {
-            errors.println(lineNo, "Type reference was ${elementType.kind}, expected ${Kind.STANDARD_TYPE}, ${Kind.ARRAY_TYPE} or ${Kind.STRUCT_TYPE}")
+            visitor.error(lineNo, "Type reference was ${elementType.kind}, expected ${Kind.STANDARD_TYPE}, ${Kind.ARRAY_TYPE} or ${Kind.STRUCT_TYPE}")
             return typeUniversal
         }
 
         if (type is ArrayTypeReference) {
             if (elementType == typeVoid) {
                 // void arrays aren't allowed
-                errors.println(lineNo, "Void array type references aren't allowed")
+                visitor.error(lineNo, "Void array type references aren't allowed")
                 return typeVoid
             }
 
@@ -69,7 +69,7 @@ class SymbolTable(private val errors: PrintWriter) {
             val length = type.length
 
             // array types are defined in the same level as the element type
-            val obj = elementTypeBlock.firstOrNull {
+            val obj = elementTypeBlock.records.firstOrNull {
                 it.name == UNNAMED && it.kind == Kind.ARRAY_TYPE
                         && it.asArrayType().elementType == elementType
                         && it.asArrayType().length == length
@@ -90,13 +90,13 @@ class SymbolTable(private val errors: PrintWriter) {
                 return obj
             }
         }
-        errors.println(lineNo, "Unknown reference $name")
+        visitor.error(lineNo, "Unknown reference '<($name)>'")
         return define(lineNo, name, Kind.UNDEFINED)
     }
 
     fun define(lineNo: Int, name: Int, kind: Kind, data: ObjectClass = Nothing): ObjectRecord {
         if (name != NO_NAME && name != UNNAMED && blocks[currentLevel].find(name) != null) {
-            errors.println(lineNo, "Defined $name more than once")
+            visitor.error(lineNo, "Defined '<($name)>' more than once")
         }
         return blocks[currentLevel].define(name, kind, data)
     }
@@ -110,8 +110,38 @@ class SymbolTable(private val errors: PrintWriter) {
 
     fun endBlock() {
         val block = blocks[currentLevel]
-        block.clear()
+        block.records.clear()
         currentLevel--
     }
+
+    /* addressing */
+    /*
+    fun variableAddressing(variables: List<ObjectRecord>) {
+        val lengths = variables.map(this::typeLength)
+        var displ = 3 + lengths.sum()
+        // variables are stored after the context part which is 3 words long
+        for (i in variables.indices) {
+            displ -= lengths[i]
+            val obj = variables[i].asVariable()
+            obj.level = currentLevel
+            obj.displ = displ
+        }
+    }
+
+    fun parameterAddressing(parameters: List<ObjectRecord>) {
+        val block = blocks[currentLevel].records
+
+        var varDispl = 3
+    }
+
+    fun typeLength(type: ObjectRecord): Int {
+        return when (type.kind) {
+            Kind.STANDARD_TYPE -> 1
+            Kind.ARRAY_TYPE -> type.asArrayType().let { it.length * typeLength(it.elementType) }
+            else -> type.asStructType().length
+        }
+    }
+*/
+
 
 }

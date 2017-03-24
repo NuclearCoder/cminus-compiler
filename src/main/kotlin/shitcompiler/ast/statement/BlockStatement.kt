@@ -1,11 +1,21 @@
 package shitcompiler.ast.statement
 
+import shitcompiler.tab
+
 /**
  * Created by NuclearCoder on 03/03/17.
  */
 
 class BlockStatement(lineNo: Int, val statements: List<Statement>) : Statement(lineNo) {
 
-    override fun toString() = "Block $statements"
+    override fun toString(): String {
+        val sb = StringBuilder("Block {\n")
+        statements.forEach {
+            sb.append(it.toString().tab())
+            sb.append('\n')
+        }
+        sb.append('}')
+        return sb.toString()
+    }
 
 }

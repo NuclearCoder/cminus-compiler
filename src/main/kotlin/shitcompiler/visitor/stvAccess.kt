@@ -1,9 +1,8 @@
-package shitcompiler.visitor.symboltable
+package shitcompiler.visitor
 
 import shitcompiler.ast.expression.VariableAccess
 import shitcompiler.ast.type.ArrayAccess
 import shitcompiler.ast.type.FieldAccess
-import shitcompiler.println
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 
@@ -19,7 +18,7 @@ fun SymbolTableVisitor.visitVariableAccess(node: VariableAccess): ObjectRecord {
                 Kind.VARIABLE -> obj.asVariable().type
                 Kind.PARAMETER -> obj.asParameter().type
                 else -> {
-                    errors.println(node.lineNo, "Identifier must refer to a constant, variable or parameter")
+                    error(node.lineNo, "Identifier '<(${node.name})>' must refer to a constant, variable or parameter")
                     typeUniversal
                 }
             }
@@ -35,11 +34,11 @@ fun SymbolTableVisitor.visitArrayAccess(node: ArrayAccess): ObjectRecord {
         if (selectorType == typeInt) {
             type.asArrayType().elementType
         } else {
-            errors.println(node.lineNo, "Indexed selector must be an integer expression")
+            error(node.lineNo, "Indexed selector must be an integer expression")
             typeUniversal
         }
     } else {
-        errors.println(node.lineNo, "Indexed selector must act on an array")
+        error(node.lineNo, "Indexed selector must act on an array")
         typeUniversal
     }
 }

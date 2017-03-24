@@ -6,6 +6,6 @@ package shitcompiler.ast.expression
 
 open class VariableAccess(lineNo: Int, val name: Int) : Expression(lineNo) {
 
-    override fun toString() = "Access id($name)"
+    override fun toString() = "<($name)>"
 
 }
