@@ -4,6 +4,7 @@ import shitcompiler.ast.function.FunctionCallStatement
 import shitcompiler.ast.function.FunctionDefinition
 import shitcompiler.ast.statement.*
 import shitcompiler.ast.type.StructDefinition
+import shitcompiler.parser.ASSIGN_INT_SYMBOLS
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.classes.VarParam
@@ -57,14 +58,21 @@ fun SymbolTableVisitor.visitDeclaration(node: Declaration) {
 }
 
 fun SymbolTableVisitor.visitAssignment(node: Assignment) {
-    assignment(node.lineNo, visitVariableAccess(node.access), visitExpression(node.value))
+    val access = visitVariableAccess(node.access)
+    val expr = visitExpression(node.value)
+
+    if (node.sym in ASSIGN_INT_SYMBOLS && (access != typeInt || expr != typeInt)) {
+        error(node.lineNo, "Trying to use assignment operators on non-integer types")
+    } else {
+        assignment(node.lineNo, access, expr)
+    }
 }
 
-fun SymbolTableVisitor.assignment(lineNo: Int, accessType: ObjectRecord, exprType: ObjectRecord) {
-    if (exprType == typeVoid) {
+fun SymbolTableVisitor.assignment(lineNo: Int, access: ObjectRecord, expr: ObjectRecord) {
+    if (expr == typeVoid) {
         error(lineNo, "Void expressions aren't assignable")
     }
-    if (accessType != exprType) {
-        error(lineNo, "Trying to assign $exprType to $accessType")
+    if (access != expr) {
+        error(lineNo, "Trying to assign $expr to $access")
     }
 }

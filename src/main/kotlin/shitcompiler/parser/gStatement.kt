@@ -81,7 +81,7 @@ fun Parser.assignmentStatement(name: Int): Assignment {
     val access = variableAccess(name)
 
     val sym = symbol
-    if (symbol == BECOMES) {
+    if (symbol in ASSIGN_OP_SYMBOLS) {
         expect(symbol)
     } else {
         syntaxError()
