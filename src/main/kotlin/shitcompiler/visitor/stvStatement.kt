@@ -8,6 +8,7 @@ import shitcompiler.parser.ASSIGN_INT_SYMBOLS
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.classes.VarParam
+import kotlin.properties.Delegates.notNull
 
 /**
  * Created by NuclearCoder on 18/03/17.
@@ -50,9 +51,15 @@ fun SymbolTableVisitor.visitDeclaration(node: Declaration) {
 
     // process assign as they are declared, to respect order of declaration
     names.forEach {
+        // check the expression before the declaration, to avoid potential recursive assignment
+        var expr: ObjectRecord by notNull()
+        if (it is Declaration.NameAssign) {
+            expr = visitExpression(it.expr)
+        }
         table.define(node.lineNo, it.name, Kind.VARIABLE, VarParam(typeObj))
         if (it is Declaration.NameAssign) {
-            assignment(node.lineNo, simpleAccess(node.lineNo, it.name), visitExpression(it.expr))
+            val access = simpleAccess(node.lineNo, it.name)
+            assignment(node.lineNo, access, expr)
         }
     }
 }

@@ -12,9 +12,9 @@ class Declaration(lineNo: Int, val type: TypeReference, val names: List<Part>) :
 
     override fun toString() =
             if (names.size == 1)
-                "Declaration $type ${names[0]}"
+                "Declaration <$type> ${names[0]}"
             else
-                "Declaration $type\n${names.map { it.toString() }.joinToString(",\n").tab()}"
+                "Declaration <$type>\n${names.map { it.toString() }.joinToString(",\n").tab()}"
 
     abstract class Part(val name: Int)
 

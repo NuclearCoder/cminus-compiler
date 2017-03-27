@@ -12,11 +12,16 @@ data class ObjectRecord(val name: Int, val kind: Kind, val data: ObjectClass, va
     fun asConstant() = data as Constant
     fun asArrayType() = data as ArrayType
     fun asStructType() = data as StructType
+    fun asPointerType() = data as PointerType
     fun asFunction() = data as FunctionR
     fun asField() = data as Field
     fun asVariable() = data as VarParam
     fun asParameter() = data as VarParam
 
-    override fun toString() = "[<($name)>: $kind${if (data == Nothing) "" else " ($data)"}]"
+    override fun toString() =
+            if (data == Nothing)
+                "[<($name)>]"
+            else
+                "[<($name)>: $data]"
 
 }

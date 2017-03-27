@@ -24,6 +24,7 @@ fun Parser.statement(): Statement {
         STRUCT -> structStatement()
         INT, CHAR, BOOL, VOID -> declarationOrFunctionStatement()
         ID -> assignmentOrFunctionStatement()
+        ASTERISK -> assignmentStatement()
         SEMICOLON -> emptyStatement()
         else -> {
             syntaxError()
@@ -40,7 +41,6 @@ fun Parser.structStatement(): Statement {
 
 fun Parser.declarationOrFunctionStatement(): Statement {
     val type = typeReference()
-
     val name = argument
     expect(ID)
 
@@ -73,12 +73,27 @@ fun Parser.assignmentOrFunctionStatement(): Statement {
     if (symbol == LEFT_PARENTHESIS) {
         return functionCall(name, isStatement = true) as Statement
     } else {
-        return assignmentStatement(name)
+        return assignmentStatement(name, pointerDepth = 0)
     }
 }
 
-fun Parser.assignmentStatement(name: Int): Assignment {
-    val access = variableAccess(name)
+fun Parser.assignmentStatement(): Assignment {
+    var pointerDepth = 0
+    while (symbol == ASTERISK) {
+        expect(ASTERISK)
+        pointerDepth++
+    }
+
+    // TODO: parentheses in variable access
+
+    val name = argument
+    expect(ID)
+
+    return assignmentStatement(name, pointerDepth)
+}
+
+fun Parser.assignmentStatement(name: Int, pointerDepth: Int): Assignment {
+    val access = variableAccess(name, pointerDepth)
 
     val sym = symbol
     if (symbol in ASSIGN_OP_SYMBOLS) {
@@ -86,6 +101,7 @@ fun Parser.assignmentStatement(name: Int): Assignment {
     } else {
         syntaxError()
     }
+
     val value = expression()
     expect(SEMICOLON)
     return Assignment(lineNo, sym, access, value)

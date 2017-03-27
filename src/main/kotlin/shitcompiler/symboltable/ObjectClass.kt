@@ -12,6 +12,7 @@ enum class Kind {
     STANDARD_TYPE,
     ARRAY_TYPE,
     STRUCT_TYPE,
+    POINTER_TYPE,
 
     FUNCTION,
 

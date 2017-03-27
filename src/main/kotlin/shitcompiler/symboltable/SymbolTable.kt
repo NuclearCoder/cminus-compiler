@@ -3,10 +3,12 @@ package shitcompiler.symboltable
 import shitcompiler.NO_NAME
 import shitcompiler.UNNAMED
 import shitcompiler.ast.type.ArrayTypeReference
+import shitcompiler.ast.type.PointerTypeReference
 import shitcompiler.ast.type.TypeReference
 import shitcompiler.symboltable.classes.ArrayType
 import shitcompiler.symboltable.classes.Constant
 import shitcompiler.symboltable.classes.Nothing
+import shitcompiler.symboltable.classes.PointerType
 import shitcompiler.visitor.SymbolTableVisitor
 
 /**
@@ -22,6 +24,8 @@ class SymbolTable(private val visitor: SymbolTableVisitor) {
     val typeVoid: ObjectRecord
     val stdTrue: ObjectRecord
     val stdFalse: ObjectRecord
+
+    val typeVoidPtr: ObjectRecord
 
     private val blocks = arrayListOf(BlockRecord(0))
 
@@ -40,6 +44,8 @@ class SymbolTable(private val visitor: SymbolTableVisitor) {
 
         stdTrue = define(0, i++, Kind.CONSTANT, Constant(1, typeBool))
         stdFalse = define(0, i, Kind.CONSTANT, Constant(0, typeBool))
+
+        typeVoidPtr = define(0, UNNAMED, Kind.POINTER_TYPE, PointerType(typeVoid))
     }
 
     fun findOrDefineType(type: TypeReference): ObjectRecord {
@@ -47,13 +53,16 @@ class SymbolTable(private val visitor: SymbolTableVisitor) {
 
         val elementType = if (type is ArrayTypeReference) {
             findOrDefineType(type.elementType)
+        } else if (type is PointerTypeReference) {
+            findOrDefineType(type.elementType)
         } else {
             find(lineNo, type.name)
         }
 
         if (elementType.kind != Kind.STANDARD_TYPE
                 && elementType.kind != Kind.ARRAY_TYPE
-                && elementType.kind != Kind.STRUCT_TYPE) {
+                && elementType.kind != Kind.STRUCT_TYPE
+                && elementType.kind != Kind.POINTER_TYPE) {
             visitor.error(lineNo, "Type reference was ${elementType.kind}, expected ${Kind.STANDARD_TYPE}, ${Kind.ARRAY_TYPE} or ${Kind.STRUCT_TYPE}")
             return typeUniversal
         }
@@ -77,6 +86,17 @@ class SymbolTable(private val visitor: SymbolTableVisitor) {
 
             if (obj != null) return obj
             return elementTypeBlock.define(UNNAMED, Kind.ARRAY_TYPE, ArrayType(elementType, length))
+        } else if (type is PointerTypeReference) {
+            val elementTypeBlock = blocks[elementType.blockLevel]
+
+            // pointer types are defined in the same level as the pointee type
+            val obj = elementTypeBlock.records.firstOrNull {
+                it.name == UNNAMED && it.kind == Kind.POINTER_TYPE
+                        && it.asPointerType().elementType == elementType
+            }
+
+            if (obj != null) return obj
+            return elementTypeBlock.define(UNNAMED, Kind.POINTER_TYPE, PointerType(elementType))
         } else {
             // if standard type, just return
             return elementType
@@ -84,8 +104,8 @@ class SymbolTable(private val visitor: SymbolTableVisitor) {
     }
 
     fun find(lineNo: Int, name: Int): ObjectRecord {
-        for (level in currentLevel downTo 0) {
-            val obj = blocks[level].find(name)
+        (currentLevel downTo 0).forEach {
+            val obj = blocks[it].find(name)
             if (obj != null) {
                 return obj
             }

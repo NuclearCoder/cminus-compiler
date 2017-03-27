@@ -180,6 +180,7 @@ class Scanner(private val input: String, private val names: MutableMap<Int, Stri
         when (currentChar) {
             '=' -> nextEmit(BECOMES_MINUS)
             '-' -> nextEmit(DOUBLE_MINUS)
+            '>' -> nextEmit(RIGHT_ARROW)
             else -> emit(MINUS)
         }
     }

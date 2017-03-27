@@ -49,6 +49,8 @@ enum class Symbol(private val s: String) {
     DIV("/"),
     MOD("%"),
 
+    RIGHT_ARROW("->"),
+
     LESSER("<"),
     GREATER(">"),
     NOT_LESSER(">="),

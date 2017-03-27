@@ -6,6 +6,6 @@ package shitcompiler.ast.type
 
 class ArrayTypeReference(lineNo: Int, val elementType: TypeReference, val length: Int) : TypeReference(lineNo, 0) {
 
-    override fun toString() = "$elementType<$length>"
+    override fun toString() = "$elementType[$length]"
 
 }

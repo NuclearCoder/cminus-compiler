@@ -1,6 +1,6 @@
 package shitcompiler.visitor
 
-import shitcompiler.ast.type.FieldAccess
+import shitcompiler.ast.access.FieldAccess
 import shitcompiler.ast.type.StructDefinition
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
@@ -29,18 +29,21 @@ fun SymbolTableVisitor.visitStructDefinition(node: StructDefinition) {
 fun SymbolTableVisitor.visitFieldAccess(node: FieldAccess): ObjectRecord {
     // check it's a struct
     val type = visitVariableAccess(node.access)
+    return fieldAccess(node.lineNo, type, node.field)
+}
+
+fun SymbolTableVisitor.fieldAccess(lineNo: Int, type: ObjectRecord, field: Int): ObjectRecord {
     return if (type.kind == Kind.STRUCT_TYPE) {
         // find the field
-        val field = node.field
         val obj = type.asStructType().fields.firstOrNull { it.name == field }
         if (obj != null) {
             obj.asField().type
         } else {
-            error(node.lineNo, "Undeclared field '<($field)>'")
+            error(lineNo, "Undeclared field '<($field)>'")
             typeUniversal
         }
     } else {
-        error(node.lineNo, "Field selector must act on a struct")
+        error(lineNo, "Field selector must act on a struct")
         typeUniversal
     }
 }

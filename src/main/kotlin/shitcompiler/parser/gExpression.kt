@@ -2,7 +2,11 @@ package shitcompiler.parser
 
 import shitcompiler.NAME_FALSE
 import shitcompiler.NAME_TRUE
-import shitcompiler.ast.expression.*
+import shitcompiler.ast.access.VariableAccess
+import shitcompiler.ast.expression.Atom
+import shitcompiler.ast.expression.BinaryOp
+import shitcompiler.ast.expression.Expression
+import shitcompiler.ast.expression.UnaryOp
 import shitcompiler.token.Symbol.*
 
 /**
@@ -30,50 +34,77 @@ fun Parser.term(): Expression {
 }
 
 fun Parser.factor(): Expression {
-    when (symbol) {
-        NUM_CONST -> {
-            val value = argument
-            expect(NUM_CONST)
-            return Atom.Integer(lineNo, value)
-        }
-        CHAR_CONST -> {
-            val value = argument
-            expect(CHAR_CONST)
-            return Atom.Char(lineNo, value)
-        }
-        TRUE -> {
-            expect(TRUE)
-            return VariableAccess(lineNo, NAME_TRUE)
-        }
-        FALSE -> {
-            expect(FALSE)
-            return VariableAccess(lineNo, NAME_FALSE)
-        }
-        ID -> {
-            val name = argument
-            expect(ID)
-
-            // it might be a function call
-            if (symbol == LEFT_PARENTHESIS) {
-                return functionCall(name, isStatement = false) as Expression
-            } else {
-                return variableAccess(name)
-            }
-        }
-        in UNARY_SYMBOLS -> {
-            val sym = symbol
-            expect(symbol)
-            return UnaryOp(lineNo, sym, factor())
-        }
+    return when (symbol) {
+        NUM_CONST -> atomNum()
+        CHAR_CONST -> atomChar()
+        TRUE, FALSE -> factorBool()
+        ID -> functionOrVariable()
+        ASTERISK -> factorVariable()
         LEFT_PARENTHESIS -> {
             expect(LEFT_PARENTHESIS)
             val node = expression()
             expect(RIGHT_PARENTHESIS)
-            return node
+            node
         }
+        in UNARY_SYMBOLS -> factorUnary()
         else -> {
             syntaxError()
-            return Atom.Unknown(lineNo)
+            Atom.Unknown(lineNo)
         }
     }
+}
+
+fun Parser.atomNum(): Atom {
+    val value = argument
+    expect(NUM_CONST)
+    return Atom.Integer(lineNo, value)
+}
+
+fun Parser.atomChar(): Atom {
+    val value = argument
+    expect(CHAR_CONST)
+    return Atom.Char(lineNo, value)
+}
+
+fun Parser.factorBool(): VariableAccess {
+    return if (symbol == TRUE) {
+        expect(TRUE)
+        VariableAccess(lineNo, NAME_TRUE)
+    } else {
+        expect(FALSE)
+        VariableAccess(lineNo, NAME_FALSE)
+    }
+}
+
+fun Parser.functionOrVariable(): Expression {
+    val name = argument
+    expect(ID)
+
+    // it might be a function call
+    if (symbol == LEFT_PARENTHESIS) {
+        return functionCall(name, isStatement = false) as Expression
+    } else {
+        return variableAccess(name, pointerDepth = 0)
+    }
+}
+
+fun Parser.factorVariable(): Expression {
+    var pointerDepth = 0
+    while (symbol == ASTERISK) {
+        expect(ASTERISK)
+        pointerDepth++
+    }
+
+    // TODO: parentheses in variable access
+
+    val name = argument
+    expect(ID)
+
+    return variableAccess(name, pointerDepth)
+}
+
+fun Parser.factorUnary(): UnaryOp {
+    val sym = symbol
+    expect(symbol)
+    return UnaryOp(lineNo, sym, factor())
 }

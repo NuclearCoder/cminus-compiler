@@ -9,6 +9,6 @@ import shitcompiler.ast.AST
 // if length is negative, the type is not considered an array
 open class TypeReference(lineNo: Int, val name: Int) : AST(lineNo) {
 
-    override fun toString() = "<<($name)>>"
+    override fun toString() = "<($name)>"
 
 }

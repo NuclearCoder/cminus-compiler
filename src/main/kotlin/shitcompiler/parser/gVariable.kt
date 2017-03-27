@@ -1,10 +1,8 @@
 package shitcompiler.parser
 
+import shitcompiler.ast.access.*
 import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.expression.VariableAccess
 import shitcompiler.ast.statement.Declaration
-import shitcompiler.ast.type.ArrayAccess
-import shitcompiler.ast.type.FieldAccess
 import shitcompiler.token.Symbol.*
 
 /**
@@ -33,14 +31,22 @@ fun Parser.nameGroupPart(name: Int, canAssign: Boolean): Declaration.Part {
     }
 }
 
-fun Parser.variableAccess(name: Int): VariableAccess {
+fun Parser.variableAccess(name: Int, pointerDepth: Int): VariableAccess {
     var access = VariableAccess(lineNo, name)
+
     while (symbol in SELECTOR_SYMBOLS) {
         if (symbol == LEFT_BRACKET) {
             access = ArrayAccess(lineNo, access, arraySelector())
+        } else if (symbol == PERIOD) {
+            access = FieldAccess(lineNo, access, fieldSelector(isPointer = false))
         } else {
-            access = FieldAccess(lineNo, access, fieldSelector())
+            access = PointerFieldAccess(lineNo, access, fieldSelector(isPointer = true))
         }
+    }
+
+    // TODO: allow parentheses in variable access instead of arbitrary precedence
+    (1..pointerDepth).forEach {
+        access = PointerAccess(lineNo, access)
     }
 
     return access
@@ -54,8 +60,8 @@ fun Parser.arraySelector(): Expression {
     return selector
 }
 
-fun Parser.fieldSelector(): Int {
-    expect(PERIOD)
+fun Parser.fieldSelector(isPointer: Boolean): Int {
+    expect(if (isPointer) RIGHT_ARROW else PERIOD)
     val field = argument
     expect(ID)
 

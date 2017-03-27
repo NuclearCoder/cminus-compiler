@@ -1,7 +1,7 @@
 package shitcompiler.ast.statement
 
+import shitcompiler.ast.access.VariableAccess
 import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.expression.VariableAccess
 import shitcompiler.token.Symbol
 
 /**

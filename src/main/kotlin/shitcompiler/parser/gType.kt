@@ -3,6 +3,7 @@ package shitcompiler.parser
 import shitcompiler.*
 import shitcompiler.ast.statement.Declaration
 import shitcompiler.ast.type.ArrayTypeReference
+import shitcompiler.ast.type.PointerTypeReference
 import shitcompiler.ast.type.StructDefinition
 import shitcompiler.ast.type.TypeReference
 import shitcompiler.token.Symbol.*
@@ -29,7 +30,10 @@ fun Parser.typeName(): Int {
             expect(VOID)
             NAME_VOID
         }
-        ID -> {
+        ID, STRUCT -> {
+            if (symbol == STRUCT)
+                expect(STRUCT)
+
             val arg = argument
             expect(ID)
             arg
@@ -42,16 +46,21 @@ fun Parser.typeName(): Int {
 }
 
 fun Parser.typeReference(): TypeReference {
-    /* a type is either a type or an array type*/
+    /* a type is either a type, a pointer or an array type */
     var reference = TypeReference(lineNo, typeName())
 
-    while (symbol == LEFT_BRACKET) {
-        expect(LEFT_BRACKET)
-        val length = argument
-        expect(NUM_CONST)
-        expect(RIGHT_BRACKET)
+    while (symbol in TYPE_QUALIFIER_SYMBOLS) {
+        if (symbol == LEFT_BRACKET) {
+            expect(LEFT_BRACKET)
+            val length = argument
+            expect(NUM_CONST)
+            expect(RIGHT_BRACKET)
 
-        reference = ArrayTypeReference(lineNo, reference, length)
+            reference = ArrayTypeReference(lineNo, reference, length)
+        } else {
+            expect(ASTERISK)
+            reference = PointerTypeReference(lineNo, reference)
+        }
     }
 
     return reference

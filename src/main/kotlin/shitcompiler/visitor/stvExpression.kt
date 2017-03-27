@@ -1,6 +1,10 @@
 package shitcompiler.visitor
 
-import shitcompiler.ast.expression.*
+import shitcompiler.ast.access.VariableAccess
+import shitcompiler.ast.expression.Atom
+import shitcompiler.ast.expression.BinaryOp
+import shitcompiler.ast.expression.Expression
+import shitcompiler.ast.expression.UnaryOp
 import shitcompiler.ast.function.FunctionCallExpression
 import shitcompiler.symboltable.ObjectRecord
 

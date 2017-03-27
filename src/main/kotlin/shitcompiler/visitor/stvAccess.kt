@@ -1,8 +1,6 @@
 package shitcompiler.visitor
 
-import shitcompiler.ast.expression.VariableAccess
-import shitcompiler.ast.type.ArrayAccess
-import shitcompiler.ast.type.FieldAccess
+import shitcompiler.ast.access.*
 import shitcompiler.symboltable.Kind
 import shitcompiler.symboltable.ObjectRecord
 
@@ -10,6 +8,8 @@ fun SymbolTableVisitor.visitVariableAccess(node: VariableAccess): ObjectRecord {
     return when (node) {
         is ArrayAccess -> visitArrayAccess(node)
         is FieldAccess -> visitFieldAccess(node)
+        is PointerAccess -> visitPointerAccess(node)
+        is PointerFieldAccess -> visitPointerFieldAccess(node)
         else -> simpleAccess(node.lineNo, node.name)
     }
 }

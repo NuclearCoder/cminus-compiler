@@ -1,7 +1,6 @@
-package shitcompiler.ast.type
+package shitcompiler.ast.access
 
 import shitcompiler.ast.expression.Expression
-import shitcompiler.ast.expression.VariableAccess
 
 /**
  * Created by NuclearCoder on 17/03/17.
