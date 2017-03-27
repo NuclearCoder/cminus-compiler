@@ -62,7 +62,7 @@ fun Parser.structTypeDefinition(): StructDefinition {
 
     val fields = mutableListOf<Declaration>()
     while (symbol in DECLARATION_SYMBOLS) {
-        fields.add(declarationStatement())
+        fields.add(declarationStatement(canAssign = false))
     }
 
     expect(END)

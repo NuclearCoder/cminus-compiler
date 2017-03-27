@@ -10,18 +10,19 @@ fun SymbolTableVisitor.visitVariableAccess(node: VariableAccess): ObjectRecord {
     return when (node) {
         is ArrayAccess -> visitArrayAccess(node)
         is FieldAccess -> visitFieldAccess(node)
+        else -> simpleAccess(node.lineNo, node.name)
+    }
+}
+
+fun SymbolTableVisitor.simpleAccess(lineNo: Int, name: Int): ObjectRecord {
+    val obj = table.find(lineNo, name)
+    return when (obj.kind) {
+        Kind.CONSTANT -> obj.asConstant().type
+        Kind.VARIABLE -> obj.asVariable().type
+        Kind.PARAMETER -> obj.asParameter().type
         else -> {
-            // simple identifier access
-            val obj = table.find(node.lineNo, node.name)
-            when (obj.kind) {
-                Kind.CONSTANT -> obj.asConstant().type
-                Kind.VARIABLE -> obj.asVariable().type
-                Kind.PARAMETER -> obj.asParameter().type
-                else -> {
-                    error(node.lineNo, "Identifier '<(${node.name})>' must refer to a constant, variable or parameter")
-                    typeUniversal
-                }
-            }
+            error(lineNo, "Identifier '<($name)>' must refer to a constant, variable or parameter")
+            typeUniversal
         }
     }
 }

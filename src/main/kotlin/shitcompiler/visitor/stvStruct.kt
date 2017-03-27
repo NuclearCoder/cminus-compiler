@@ -20,7 +20,7 @@ fun SymbolTableVisitor.visitStructDefinition(node: StructDefinition) {
 
         val typeObj = table.findOrDefineType(type)
 
-        names.forEach { fields.add(ObjectRecord(it, Kind.FIELD, Field(typeObj), 0)) }
+        names.forEach { fields.add(ObjectRecord(it.name, Kind.FIELD, Field(typeObj), 0)) }
     }
 
     table.define(node.lineNo, node.name, Kind.STRUCT_TYPE, StructType(fields))

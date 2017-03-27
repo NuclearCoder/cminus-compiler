@@ -48,19 +48,19 @@ fun Parser.declarationOrFunctionStatement(): Statement {
     if (symbol == LEFT_PARENTHESIS) {
         return functionDefinition(name, type)
     } else {
-        return declarationStatement(name, type)
+        return declarationStatement(name, type, canAssign = true)
     }
 }
 
-fun Parser.declarationStatement(): Declaration {
+fun Parser.declarationStatement(canAssign: Boolean): Declaration {
     val type = typeReference()
     val name = argument
     expect(ID)
-    return declarationStatement(name, type)
+    return declarationStatement(name, type, canAssign)
 }
 
-fun Parser.declarationStatement(firstName: Int, type: TypeReference): Declaration {
-    val names = nameGroup(firstName)
+fun Parser.declarationStatement(firstName: Int, type: TypeReference, canAssign: Boolean): Declaration {
+    val names = nameGroup(firstName, canAssign)
     expect(SEMICOLON)
     return Declaration(lineNo, type, names)
 }
@@ -81,7 +81,7 @@ fun Parser.assignmentStatement(name: Int): Assignment {
     val access = variableAccess(name)
 
     val sym = symbol
-    if (symbol in ASSIGN_OP_SYMBOLS) {
+    if (symbol == BECOMES) {
         expect(symbol)
     } else {
         syntaxError()

@@ -8,6 +8,6 @@ import shitcompiler.token.Symbol
 
 class BinaryOp(lineNo: Int, val sym: Symbol, val left: Expression, val right: Expression) : Expression(lineNo) {
 
-    override fun toString() = "BinaryOp $left $sym $right"
+    override fun toString() = "($left $sym $right)"
 
 }

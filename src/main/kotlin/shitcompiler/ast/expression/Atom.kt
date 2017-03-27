@@ -8,11 +8,11 @@ package shitcompiler.ast.expression
 sealed class Atom(lineNo: Int, val value: Int) : Expression(lineNo) {
 
     class Integer(lineNo: Int, value: Int) : Atom(lineNo, value) {
-        override fun toString() = "int($value)"
+        override fun toString() = "$value"
     }
 
     class Char(lineNo: Int, value: Int) : Atom(lineNo, value) {
-        override fun toString() = "char($value)"
+        override fun toString() = "'$value'"
     }
 
     class Unknown(lineNo: Int) : Atom(lineNo, 0) {

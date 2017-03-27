@@ -5,6 +5,7 @@ import shitcompiler.ast.function.FunctionDefinition
 import shitcompiler.ast.statement.*
 import shitcompiler.ast.type.StructDefinition
 import shitcompiler.symboltable.Kind
+import shitcompiler.symboltable.ObjectRecord
 import shitcompiler.symboltable.classes.VarParam
 
 /**
@@ -46,17 +47,24 @@ fun SymbolTableVisitor.visitDeclaration(node: Declaration) {
         error(node.lineNo, "Void variables can not be declared")
     }
 
-    names.forEach { table.define(node.lineNo, it, Kind.VARIABLE, VarParam(typeObj)) }
+    // process assign as they are declared, to respect order of declaration
+    names.forEach {
+        table.define(node.lineNo, it.name, Kind.VARIABLE, VarParam(typeObj))
+        if (it is Declaration.NameAssign) {
+            assignment(node.lineNo, simpleAccess(node.lineNo, it.name), visitExpression(it.expr))
+        }
+    }
 }
 
 fun SymbolTableVisitor.visitAssignment(node: Assignment) {
-    val accessType = visitVariableAccess(node.access)
-    val exprType = visitExpression(node.value)
+    assignment(node.lineNo, visitVariableAccess(node.access), visitExpression(node.value))
+}
 
+fun SymbolTableVisitor.assignment(lineNo: Int, accessType: ObjectRecord, exprType: ObjectRecord) {
     if (exprType == typeVoid) {
-        error(node.lineNo, "Void expressions aren't assignable")
+        error(lineNo, "Void expressions aren't assignable")
     }
     if (accessType != exprType) {
-        error(node.lineNo, "Trying to assign $exprType to $accessType")
+        error(lineNo, "Trying to assign $exprType to $accessType")
     }
 }

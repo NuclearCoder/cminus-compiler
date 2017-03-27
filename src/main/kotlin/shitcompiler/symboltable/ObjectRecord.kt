@@ -17,6 +17,6 @@ data class ObjectRecord(val name: Int, val kind: Kind, val data: ObjectClass, va
     fun asVariable() = data as VarParam
     fun asParameter() = data as VarParam
 
-    override fun toString() = "[$name: $kind]" + (if (data == Nothing) "" else "($data)")
+    override fun toString() = "[<($name)>: $kind${if (data == Nothing) "" else " ($data)"}]"
 
 }
