@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
         val errors = StringWriter()
         val ps = PrintWriter(errors)
 
-        val names = mutableMapOf<Int, String>()
+        val names = mutableMapOf(UNNAMED to "<no-name>")
 
         val tokens = Scanner(input, names, ps).execute()
         println("  Tokens:\n${format(names, tokens.toPrettyString())}")

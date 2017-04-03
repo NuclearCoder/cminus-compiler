@@ -26,7 +26,7 @@ val KEYWORDS = mapOf(
         "while" to WHILE
 )
 
-val NO_NAME = -1 // used when the reference is undefined
+val UNDEFINED = -1 // used when the reference is undefined
 val UNNAMED = 0 // used when the reference should not be named
 val NAME_INT = 1
 val NAME_CHAR = 2

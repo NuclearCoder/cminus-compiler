@@ -10,14 +10,9 @@ import shitcompiler.tab
 
 class StructDefinition(lineNo: Int, val name: Int, val fields: List<Declaration>) : Statement(lineNo) {
 
-    override fun toString(): String {
-        val sb = StringBuilder("Struct ")
-        sb.append("<(")
-        sb.append(name)
-        sb.append(")> {\n")
-        sb.append(fields.map { it.toString().tab() }.joinToString(",\n"))
-        sb.append("\n}")
-        return sb.toString()
-    }
+    override fun toString() =
+            "Struct <($name)> {\n${
+            fields.map { it.toString().tab() }.joinToString("\n")
+            }\n}"
 
 }

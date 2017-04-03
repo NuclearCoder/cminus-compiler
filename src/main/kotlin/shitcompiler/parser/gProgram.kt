@@ -19,12 +19,13 @@ fun Parser.program(): Program {
 
     while (symbol in DECLARATION_SYMBOLS) {
         statement().let filter@ {
-            if (it is EmptyStatement) // skip empty statements
-                return@filter
-            if (it is BlockStatement
-                    || it is Assignment
-                    || it is FunctionCallStatement) {
-                errors.println(lineNo, "Illegal statement type at the program level ${it::class.simpleName}")
+            if (it is EmptyStatement
+                || it is BlockStatement
+                || it is Assignment
+                || it is FunctionCallStatement) {
+
+                if (it !is EmptyStatement)
+                    errors.println(lineNo, "Illegal statement type at the program level ${it::class.simpleName}")
                 return@filter
             }
             statements.add(it)

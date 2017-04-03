@@ -25,7 +25,7 @@ class Scanner(private val input: String, private val names: MutableMap<Int, Stri
 
     fun execute(): Queue<Int> {
         nextChar()
-        while (ETX != currentChar)
+        while (currentChar != ETX)
             nextSymbol()
         emit(END_TEXT)
         return symbols
@@ -62,7 +62,7 @@ class Scanner(private val input: String, private val names: MutableMap<Int, Stri
     }
 
     private fun skipLine() {
-        while (currentChar != '\n' && currentChar != ETX)
+        while (currentChar != ETX && currentChar != '\n')
             nextChar()
     }
 
@@ -117,7 +117,7 @@ class Scanner(private val input: String, private val names: MutableMap<Int, Stri
 
     private fun scanNumeral() {
         var value: Int = 0
-        while (currentChar.isDigit()) {
+        while (currentChar != ETX && currentChar.isDigit()) {
             val digit = (currentChar - '0')
             if (value <= (Int.MAX_VALUE - digit) / 10) {
                 value = 10 * value + digit
@@ -232,7 +232,7 @@ class Scanner(private val input: String, private val names: MutableMap<Int, Stri
     private fun skipLongComment() {
         // support nested comments
         var level = 1
-        lgcom@ while (ETX != currentChar && level > 0) {
+        lgcom@ while (currentChar != ETX && level > 0) {
             val chr = currentChar
             nextChar()
             when (chr) {
