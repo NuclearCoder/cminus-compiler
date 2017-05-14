@@ -2,7 +2,11 @@ package shitcompiler.visitor
 
 import shitcompiler.ast.function.FunctionCallStatement
 import shitcompiler.ast.function.FunctionDefinition
-import shitcompiler.ast.statement.*
+import shitcompiler.ast.statement.Assignment
+import shitcompiler.ast.statement.BlockStatement
+import shitcompiler.ast.statement.Declaration
+import shitcompiler.ast.statement.EmptyStatement
+import shitcompiler.ast.statement.Statement
 import shitcompiler.ast.type.StructDefinition
 import shitcompiler.parser.ASSIGN_INT_SYMBOLS
 import shitcompiler.symboltable.Kind
@@ -32,6 +36,10 @@ fun SymbolTableVisitor.visitStatement(node: Statement) {
 fun SymbolTableVisitor.visitBlock(node: BlockStatement, before: () -> Unit = {}) {
     table.beginBlock()
     before()
+
+    for (definition in node.definitions) {
+        visitStatement(definition)
+    }
 
     for (statement in node.statements) {
         visitStatement(statement)

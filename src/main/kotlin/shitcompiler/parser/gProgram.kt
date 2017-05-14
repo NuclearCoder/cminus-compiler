@@ -4,9 +4,6 @@ import shitcompiler.ast.Program
 import shitcompiler.ast.function.FunctionCallStatement
 import shitcompiler.ast.statement.Assignment
 import shitcompiler.ast.statement.BlockStatement
-import shitcompiler.ast.statement.EmptyStatement
-import shitcompiler.ast.statement.Statement
-import shitcompiler.println
 
 /**
  * Created by NuclearCoder on 26/01/17.
@@ -15,21 +12,11 @@ import shitcompiler.println
 fun Parser.program(): Program {
     // a program is a collection of functions and struct declarations
 
-    val statements = mutableListOf<Statement>()
-
-    while (symbol in DECLARATION_SYMBOLS) {
-        statement().let filter@ {
-            if (it is EmptyStatement) // skip empty statements
-                return@filter
-            if (it is BlockStatement
-                    || it is Assignment
-                    || it is FunctionCallStatement) {
-                errors.println(lineNo, "Illegal statement type at the program level ${it::class.simpleName}")
-                return@filter
-            }
-            statements.add(it)
-        }
-    }
+    val statements = statementList(
+            BlockStatement::class,
+            FunctionCallStatement::class,
+            Assignment::class,
+            ignore = true)
 
     return Program(lineNo, statements)
 }

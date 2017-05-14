@@ -8,14 +8,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: kotlin_version
     }
 }
 
 apply plugin: 'kotlin'
 apply plugin: 'application'
-
-mainClassName = 'shitcompiler.MainKt'
 
 repositories {
     mavenCentral()
@@ -24,8 +22,11 @@ mainClassName = 'shitcompiler.MainKt'
 
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version
+
+    compile group: 'org.ow2.asm', name: 'asm', version: '5.2'
+
 }
 
 jar {

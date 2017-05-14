@@ -95,8 +95,7 @@ class Scanner(private val input: String, private val names: MutableMap<Int, Stri
             '&' -> scanAmp()
             '|' -> scanPipe()
             '%' -> nextEmit(MOD)
-            ETX -> {
-            }
+            ETX -> Unit
             else -> nextEmit(UNKNOWN)
         }
     }

@@ -1,18 +1,36 @@
 package shitcompiler.parser
 
-import shitcompiler.ast.statement.*
+import shitcompiler.ast.function.FunctionCallStatement
+import shitcompiler.ast.function.FunctionDefinition
+import shitcompiler.ast.statement.Assignment
+import shitcompiler.ast.statement.BlockStatement
+import shitcompiler.ast.statement.Declaration
+import shitcompiler.ast.statement.EmptyStatement
+import shitcompiler.ast.statement.Statement
+import shitcompiler.ast.type.StructDefinition
 import shitcompiler.ast.type.TypeReference
+import shitcompiler.println
 import shitcompiler.token.Symbol.*
+import kotlin.reflect.KClass
 
 /**
  * Created by NuclearCoder on 03/03/17.
  */
 
-fun Parser.statementList(): List<Statement> {
+fun Parser.statementList(vararg without: KClass<out Statement>, ignore: Boolean): List<Statement> {
     val statements = mutableListOf<Statement>()
 
     while (symbol in STATEMENT_SYMBOLS) {
-        statement().let { if (it !is EmptyStatement) statements.add(it) }
+        statement().let {
+            if (it !is EmptyStatement) {
+                if (it::class in without) {
+                    errors.println(lineNo, "Illegal statement type ${it::class.simpleName}")
+                    if (!ignore)
+                        return@statementList statements // stop there
+                }
+                statements.add(it)
+            }
+        }
     }
 
     return statements
@@ -109,9 +127,23 @@ fun Parser.assignmentStatement(name: Int, pointerDepth: Int): Assignment {
 
 fun Parser.blockStatement(): BlockStatement {
     expect(BEGIN)
-    val statements = statementList()
+
+    /* a block is a list of definitions followed by statements */
+    val definitions = statementList(
+            BlockStatement::class,
+            FunctionDefinition::class,
+            FunctionCallStatement::class,
+            Assignment::class,
+            ignore = false)
+
+    val statements = statementList(
+            StructDefinition::class,
+            Declaration::class,
+            FunctionDefinition::class,
+            ignore = true)
+
     expect(END)
-    return BlockStatement(lineNo, statements)
+    return BlockStatement(lineNo, definitions, statements)
 }
 
 fun Parser.emptyStatement(): Statement {
