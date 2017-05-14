@@ -40,7 +40,7 @@ fun Parser.typeName(): Int {
         }
         else -> {
             syntaxError()
-            NO_NAME
+            UNDEFINED
         }
     }
 }

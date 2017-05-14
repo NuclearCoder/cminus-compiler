@@ -37,7 +37,7 @@ fun format(names: Map<Int, String>, msg: String): String {
     val sb = StringBuffer(msg.length)
     while (matcher.find()) {
         val index = matcher.group(1).toInt()
-        matcher.appendReplacement(sb, names[index] ?: "<no-name>")
+        matcher.appendReplacement(sb, names[index] ?: "<undefined>")
     }
     matcher.appendTail(sb)
     return sb.toString()

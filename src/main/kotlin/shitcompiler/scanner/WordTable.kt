@@ -29,10 +29,10 @@ class WordTable(private val names: MutableMap<Int, String>) {
     }
 
     fun search(text: String): WordRecord {
-        return table.computeIfAbsent(text, {
+        return table.computeIfAbsent(text) {
             names[++nameIndex] = text
             WordRecord(true, nameIndex)
-        })
+        }
     }
 
 }

@@ -5,8 +5,6 @@ import shitcompiler.ast.Program
 import shitcompiler.println
 import shitcompiler.removeSymbol
 import shitcompiler.token.Symbol
-import shitcompiler.token.Symbol.END_TEXT
-import shitcompiler.token.Symbol.NEWLINE
 import java.io.PrintWriter
 import java.util.*
 
@@ -27,7 +25,7 @@ class Parser(private val symbols: Queue<Int>, internal val errors: PrintWriter) 
 
         val root = program()
 
-        if (symbol != END_TEXT)
+        if (symbol != Symbol.END_TEXT)
             syntaxError()
 
         return root
@@ -35,7 +33,7 @@ class Parser(private val symbols: Queue<Int>, internal val errors: PrintWriter) 
 
     private fun nextSymbol() {
         symbol = symbols.removeSymbol()
-        while (symbol == NEWLINE) {
+        while (symbol == Symbol.NEWLINE) {
             lineNo++
             symbol = symbols.removeSymbol()
         }
@@ -51,8 +49,8 @@ class Parser(private val symbols: Queue<Int>, internal val errors: PrintWriter) 
     internal fun expect(expected: Symbol) {
         if (symbol == expected) nextSymbol()
         else {
-            if (symbol == Symbol.UNKNOWN) nextSymbol()
             syntaxError()
+            nextSymbol()
         }
     }
 

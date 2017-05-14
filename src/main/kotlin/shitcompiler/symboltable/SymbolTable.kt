@@ -1,6 +1,6 @@
 package shitcompiler.symboltable
 
-import shitcompiler.NO_NAME
+import shitcompiler.UNDEFINED
 import shitcompiler.UNNAMED
 import shitcompiler.ast.type.ArrayTypeReference
 import shitcompiler.ast.type.PointerTypeReference
@@ -115,7 +115,7 @@ class SymbolTable(private val visitor: SymbolTableVisitor) {
     }
 
     fun define(lineNo: Int, name: Int, kind: Kind, data: ObjectClass = Nothing): ObjectRecord {
-        if (name != NO_NAME && name != UNNAMED && blocks[currentLevel].find(name) != null) {
+        if (name != UNDEFINED && name != UNNAMED && blocks[currentLevel].find(name) != null) {
             visitor.error(lineNo, "Defined '<($name)>' more than once")
         }
         return blocks[currentLevel].define(name, kind, data)
